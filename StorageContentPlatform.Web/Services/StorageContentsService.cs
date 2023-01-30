@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Core;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using StorageContentPlatform.Web.Entities;
 using StorageContentPlatform.Web.Interfaces;
@@ -93,7 +94,7 @@ namespace StorageContentPlatform.Web.Services
                     result.Add(blobInfo);
                 }
             }
-            return result.OrderBy(b=>b.Name);
+            return result.OrderBy(b => b.Name);
         }
 
         public async Task<BlobContent> GetBlobAsync(string containerName, string blobName)
@@ -102,7 +103,19 @@ namespace StorageContentPlatform.Web.Services
             result.Name = blobName;
             LoadConfig();
 
-            var blobServiceClient = new BlobServiceClient(this.configurationValues.StorageConnectionString);
+            BlobClientOptions options = new()
+            {
+                Retry =
+                {
+                        Delay = TimeSpan.FromSeconds(2),
+                        MaxRetries = 5,
+                        Mode = RetryMode.Exponential,
+                        MaxDelay = TimeSpan.FromSeconds(10)
+                    },
+                GeoRedundantSecondaryUri = new Uri(GetSecondaryUrl())
+            };
+
+            var blobServiceClient = new BlobServiceClient(this.configurationValues.StorageConnectionString, options);
 
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
@@ -111,8 +124,21 @@ namespace StorageContentPlatform.Web.Services
             var blobContent = await blobClient.DownloadContentAsync();
 
             result.Content = blobContent.Value.Content.ToString();
-            
+
             return result;
+        }
+
+        private string GetSecondaryUrl()
+        {
+            string secondaryUrl = null;
+            var segments = this.configurationValues.StorageConnectionString.Split(";");
+            var accountNameSegment = segments.Where(s=>s.ToLower().StartsWith("accountname")).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(accountNameSegment))
+            {
+                var accountName = accountNameSegment.Split("=")[1];
+                secondaryUrl = $"https://{accountName}-secondary.blob.core.windows.net";
+            }
+            return secondaryUrl;
         }
     }
 }
