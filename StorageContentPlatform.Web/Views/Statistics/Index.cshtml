@@ -1,0 +1,66 @@
+﻿@model StorageContentPlatform.Web.Models.StatisticsController.IndexViewModel
+
+@{
+    ViewData["Title"] = "Storage Statistics";
+}
+
+<h3>Storage Statistics</h3>
+
+<div>
+    <dl class="row">
+        <dt class = "col-sm-2">
+           From
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.FromFilter.ToString("dd/MM/yyyy HH:mm:ss")
+        </dd>
+        <dt class = "col-sm-2">
+            To
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.ToFilter.ToString("dd/MM/yyyy HH:mm:ss")
+        </dd>
+    </dl>
+</div>
+<br/>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Inventory Date</th>
+            <th>Total</th>
+            <th>Hot Tier</th>
+            <th>Cool Tier</th>
+            <th>Archive Tier</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Statistics)
+        {
+            <tr>
+                <td>
+                    @item.InventoryStartTime.ToString("dd/MM/yyyy HH:mm:ss")
+                </td>
+                <td>
+                    @item.ObjectCount blobs
+                    <br/>
+                    @item.TotalObjectSizeInMBytes Mb
+                </td>
+                <td>
+                    @item.ObjectInHotCount blobs
+                    <br/>
+                    @item.TotalObjectInHotSizeInMBytes Mb
+                </td>
+                <td>
+                    @item.ObjectInCoolCount blobs
+                    <br />
+                    @item.TotalObjectInCoolSizeInMBytes Mb
+                </td>
+                <td>
+                    @item.ObjectInArchiveCount blobs
+                    <br />
+                    @item.TotalObjectInArchiveSizeInMBytes Mb
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

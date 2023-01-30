@@ -1,0 +1,40 @@
+{
+  "destinationContainer": "inventory-destination-container",
+  "endpoint": "https://testaccount.blob.core.windows.net",
+  "files": [
+    {
+      "blob": "2021/05/26/13-25-36/Rule_1/Rule_1.csv",
+      "size": 12710092
+    }
+  ],
+  "inventoryCompletionTime": "2021-05-26T13:35:56Z",
+  "inventoryStartTime": "2021-05-26T13:25:36Z",
+  "ruleDefinition": {
+    "filters": {
+      "blobTypes": [ "blockBlob" ],
+      "includeBlobVersions": false,
+      "includeSnapshots": false,
+      "prefixMatch": [ "penner-test-container-100003" ]
+    },
+    "format": "csv",
+    "objectType": "blob",
+    "schedule": "daily",
+    "schemaFields": [
+      "Name",
+      "Creation-Time",
+      "BlobType",
+      "Content-Length",
+      "LastAccessTime",
+      "Last-Modified",
+      "Metadata",
+      "AccessTier"
+    ]
+  },
+  "ruleName": "Rule_1",
+  "status": "Succeeded",
+  "summary": {
+    "objectCount": 110000,
+    "totalObjectSize": 23789775
+  },
+  "version": "1.0"
+}

@@ -1,0 +1,52 @@
+﻿@model StorageContentPlatform.Web.Models.ContentsController.ContainerViewModel
+
+@{
+    ViewData["Title"] = $"Container {Model.ContainerName}";
+}
+
+<h3>Container @Model.ContainerName</h3>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Date
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Date.ToString("dd/MM/yyyy")
+        </dd>
+    </dl>
+</div>
+<br />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Blob Name</th>
+            <th>Last Modified</th>
+            <th>Access Tier</th>
+            <th>Replication</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Blobs)
+        {
+            <tr>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    @item.LastModified?.ToString("dd/MM/yyyy HH:mm:ss zzz")
+                </td>
+                <td>
+                    @item.Tier
+                </td>
+                <td>
+                    @item.ReplicationStatus
+                </td>
+                <td>
+                    @Html.ActionLink("View", "Blob", new {  containerName=Model.ContainerName,blobName=item.Name  })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
