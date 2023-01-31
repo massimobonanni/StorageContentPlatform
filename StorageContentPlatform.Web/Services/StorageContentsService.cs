@@ -37,7 +37,7 @@ namespace StorageContentPlatform.Web.Services
             var result = new List<ContainerInfo>();
             LoadConfig();
 
-            var blobServiceClient = new BlobServiceClient(this.configurationValues.StorageConnectionString);
+            var blobServiceClient = CreateBlobServiceClient();
 
             var resultSegment = blobServiceClient
                     .GetBlobContainersAsync(BlobContainerTraits.Metadata, null, default)
@@ -68,7 +68,7 @@ namespace StorageContentPlatform.Web.Services
             var result = new List<Entities.BlobInfo>();
             LoadConfig();
 
-            var blobServiceClient = new BlobServiceClient(this.configurationValues.StorageConnectionString);
+            var blobServiceClient = CreateBlobServiceClient();
 
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
@@ -102,7 +102,22 @@ namespace StorageContentPlatform.Web.Services
             var result = new BlobContent();
             result.Name = blobName;
             LoadConfig();
+            
+            var blobServiceClient = CreateBlobServiceClient();
 
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            var blobContent = await blobClient.DownloadContentAsync();
+
+            result.Content = blobContent.Value.Content.ToString();
+
+            return result;
+        }
+
+        private BlobServiceClient CreateBlobServiceClient()
+        {
             BlobClientOptions options = new()
             {
                 Retry =
@@ -116,16 +131,7 @@ namespace StorageContentPlatform.Web.Services
             };
 
             var blobServiceClient = new BlobServiceClient(this.configurationValues.StorageConnectionString, options);
-
-            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-
-            var blobClient = containerClient.GetBlobClient(blobName);
-
-            var blobContent = await blobClient.DownloadContentAsync();
-
-            result.Content = blobContent.Value.Content.ToString();
-
-            return result;
+            return blobServiceClient;
         }
 
         private string GetSecondaryUrl()
