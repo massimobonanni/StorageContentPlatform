@@ -94,7 +94,7 @@ namespace StorageContentPlatform.Web.Services
                     result.Add(blobInfo);
                 }
             }
-            return result.OrderBy(b => b.Name);
+            return result.OrderByDescending(b => b.LastModified);
         }
 
         public async Task<BlobContent> GetBlobAsync(string containerName, string blobName)
