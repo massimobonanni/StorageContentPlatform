@@ -17,11 +17,11 @@ namespace StorageContentPlatform.Web.Controllers
         }
 
         // GET: StatisticsController
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(int dayHistory = 30)
         {
             var model = new IndexViewModel();
             model.ToFilter = DateTime.Now;
-            model.FromFilter = model.ToFilter.AddDays(-30);
+            model.FromFilter = model.ToFilter.AddDays(-dayHistory);
             model.Statistics = await this._statisticsService.GetStatisticsAsync(model.ToFilter, model.FromFilter);
             return View(model);
         }
