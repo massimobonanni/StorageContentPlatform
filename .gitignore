@@ -349,3 +349,4 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 /StorageContentPlatform.Web/Properties/ServiceDependencies/euscontentwebsite - Web Deploy
+/StorageContentPlatform.ContentCreator/Properties/ServiceDependencies/scpeuscontentgenerator - Zip Deploy
