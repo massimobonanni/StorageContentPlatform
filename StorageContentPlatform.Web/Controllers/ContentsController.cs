@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StorageContentPlatform.Web.Interfaces;
 using StorageContentPlatform.Web.Models.ContentsController;
+using System.Globalization;
 
 namespace StorageContentPlatform.Web.Controllers
 {
@@ -24,12 +25,21 @@ namespace StorageContentPlatform.Web.Controllers
             return View(model);
         }
 
-        // GET: ContentController/Container?containerName=<container name>
-        public async Task<ActionResult> Container(string containerName)
+        // GET: ContentController/Container?containerName=<container name>&date=20230210
+        public async Task<ActionResult> Container(string containerName,string date=null)
         {
             var model = new ContainerViewModel();
             model.ContainerName = containerName;
-            model.Date = DateTime.Now;
+            if (string.IsNullOrWhiteSpace(date))
+                model.Date = DateTime.Now;
+            else
+            {
+                if (DateTime.TryParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture, 
+                    DateTimeStyles.None, out DateTime parsedDate))
+                    model.Date = parsedDate;
+                else
+                    model.Date = DateTime.Now;
+            }
             model.Blobs = await this.contentsService.GetBlobsAsync(model.ContainerName, model.Date);
             return View(model);
         }

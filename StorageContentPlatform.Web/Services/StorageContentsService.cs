@@ -118,6 +118,7 @@ namespace StorageContentPlatform.Web.Services
 
         private BlobServiceClient CreateBlobServiceClient()
         {
+            // For more info about BlobClientOptions look at https://learn.microsoft.com/en-us/dotnet/api/azure.storage.blobs.blobclientoptions?view=azure-dotnet
             BlobClientOptions options = new()
             {
                 Retry =
@@ -126,7 +127,7 @@ namespace StorageContentPlatform.Web.Services
                         MaxRetries = 5,
                         Mode = RetryMode.Exponential,
                         MaxDelay = TimeSpan.FromSeconds(10)
-                    },
+                },
                 GeoRedundantSecondaryUri = new Uri(GetSecondaryUrl())
             };
 
