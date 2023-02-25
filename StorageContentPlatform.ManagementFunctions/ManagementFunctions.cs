@@ -20,14 +20,16 @@ namespace StorageContentPlatform.ManagementFunctions
         private readonly IConfiguration configuration;
         private readonly IInventoryAnalyzer inventoryAnalyzer;
         private readonly IInventoryPersistanceService persistanceService;
+        private readonly IPersistenceManagementService persistentManagementService;
 
         public ManagementFunctions(IConfiguration configuration,
-            IInventoryAnalyzer inventoryAnalyzer, IInventoryPersistanceService persistanceService)
+            IInventoryAnalyzer inventoryAnalyzer, IInventoryPersistanceService persistanceService,
+            IPersistenceManagementService persistentManagementService)
         {
             this.configuration = configuration;
             this.inventoryAnalyzer = inventoryAnalyzer;
             this.persistanceService = persistanceService;
-
+            this.persistentManagementService = persistentManagementService;
         }
 
         [FunctionName(nameof(ManageInventoryCompleted))]
@@ -53,7 +55,7 @@ namespace StorageContentPlatform.ManagementFunctions
                 if (inventoryStatistics != null)
                 {
                     log.LogInformation($"Calling SaveAsync {data.ManifestBlobUrl}");
-                    var saveResult=await this.persistanceService.SaveAsync(inventoryStatistics);
+                    var saveResult = await this.persistanceService.SaveAsync(inventoryStatistics);
                     log.LogInformation($"Called SaveAsync {data.ManifestBlobUrl} with {saveResult} result");
                 }
                 else
@@ -65,8 +67,22 @@ namespace StorageContentPlatform.ManagementFunctions
             {
                 log.LogError($"Inventory manifest {data.ManifestBlobUrl} not read");
             }
-           
+        }
 
+        [FunctionName(nameof(BlobDeletedCompleted))]
+        public async Task BlobDeletedCompleted([EventGridTrigger] EventGridEvent eventGridEvent,
+            ILogger log)
+        {
+            log.LogInformation(eventGridEvent.Data.ToString());
+
+            var data = eventGridEvent.Data.ToObjectFromJson<BlobDeletedData>(new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            var result= await this.persistentManagementService.UndeleteBlobAsync(data.url);
+
+            log.LogInformation($"UndeleteBlobAsync {data.url} with {result} result");
         }
     }
 }

@@ -21,6 +21,7 @@ namespace StorageContentPlatform.ManagementFunctions
         {
             builder.Services.AddScoped<IInventoryPersistanceService, StorageTableInventoryPersistanceService>();
             builder.Services.AddScoped<IInventoryAnalyzer, InventoryAnalyzer>();
+            builder.Services.AddScoped<IPersistenceManagementService, StorageManagementService>();
         }
     }
 }
