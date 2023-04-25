@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using StorageContentPlatform.ContentCreator.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -21,46 +22,51 @@ namespace StorageContentPlatform.ContentCreator.Services
         private readonly IPersistanceProvider persistanceProvider;
         private readonly IConfiguration configuration;
         private readonly Configuration configurationValues;
-        
+        private readonly ILogger<ContentGenerator> logger;
+
         public ContentGenerator(IPersistanceProvider persistanceProvider,
-            IConfiguration configuration)
+            IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             this.persistanceProvider = persistanceProvider;
             this.configuration = configuration;
             configurationValues = new Configuration();
+            this.logger = loggerFactory.CreateLogger<ContentGenerator>();
         }
 
         public async Task<bool> GenerateContentsAsync()
         {
             var result = true;
             LoadConfig();
-            
+
             var strBuild = new StringBuilder();
             var cumulativeSize = 0;
-            while (cumulativeSize/1024 < this.configurationValues.ContentsSizeForGenerationInKb )
+            while (cumulativeSize / 1024.0 < this.configurationValues.ContentsSizeForGenerationInKb)
             {
                 var size = 0;
-                while (size/1024 < this.configurationValues.BlobMinimumSizeInKb)
+                while (size / 1024.0 < this.configurationValues.BlobMinimumSizeInKb)
                 {
-                    var sentence = Faker.Lorem.Sentence(Faker.RandomNumber.Next(1, 20));
+                    var sentence = Faker.Lorem.Sentence(Faker.RandomNumber.Next(1, 1000));
                     size += System.Text.ASCIIEncoding.UTF8.GetByteCount(sentence);
                     strBuild.AppendLine(sentence);
                 }
 
                 var contentName = @$"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid()}.txt";
-                
-                await persistanceProvider.SaveContentAsync(contentName,strBuild.ToString());
-                
+
+                this.logger.LogInformation("Saving content {ContentName} with size {Size} bytes", contentName, size);
+                await persistanceProvider.SaveContentAsync(contentName, strBuild.ToString());
+                this.logger.LogInformation("Saved content {ContentName} with size {Size} bytes", contentName, size);
+
                 strBuild.Clear();
                 cumulativeSize += size;
             }
-            
+
             return result;
         }
 
         private void LoadConfig()
         {
-            this.configurationValues.BlobMinimumSizeInKb=this.configuration.GetValue<int>("BlobMinimumSizeInKb");
+            this.logger.LogInformation("Loading configuration");
+            this.configurationValues.BlobMinimumSizeInKb = this.configuration.GetValue<int>("BlobMinimumSizeInKb");
             this.configurationValues.ContentsSizeForGenerationInKb = this.configuration.GetValue<int>("ContentsSizeForGenerationInKb");
         }
     }
