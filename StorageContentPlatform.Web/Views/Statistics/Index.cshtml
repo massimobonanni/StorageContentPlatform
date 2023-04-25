@@ -21,6 +21,32 @@
             @Model.ToFilter.ToString("dd/MM/yyyy HH:mm:ss")
         </dd>
     </dl>
+    <div class="accordion" id="notes">
+        <div class="accordion-item">
+            <div class="accordion-header" id="queryStringParam">
+                <button class="accordion-button h5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQueryStringParam" aria-expanded="true" aria-controls="collapseQueryStringParam">
+                    Querystring parameters
+                </button>
+            </div>
+            <div id="collapseQueryStringParam" class="accordion-collapse collapse" aria-labelledby="queryStringParam" data-bs-parent="#notes">
+                <div class="accordion-body h6">
+                    <text class="font-monospace">dayHistory</text> : number of day to retrieve. Default = 30.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <div class="accordion-header" id="exportParam">
+                <button class="accordion-button h5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExportParam" aria-expanded="true" aria-controls="collapseExportParam">
+                    Export data
+                </button>
+            </div>
+            <div id="collapseExportParam" class="accordion-collapse collapse" aria-labelledby="exportParam" data-bs-parent="#notes">
+                <div class="accordion-body h6">
+                    Call url <text class="font-monospace">/statistics/export?dayHistory=30</text> to download CSV file for the last <text class="font-monospace">dayHistory</text> days.
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <br/>
 <table class="table">

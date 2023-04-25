@@ -15,6 +15,20 @@
             @Model.Date.ToString("dd/MM/yyyy")
         </dd>
     </dl>
+    <div class="accordion" id="notes">
+        <div class="accordion-item">
+            <div class="accordion-header" id="queryStringParam">
+                <button class="accordion-button h5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQueryStringParam" aria-expanded="true" aria-controls="collapseQueryStringParam">
+                    Querystring parameters
+                </button>
+            </div>
+            <div id="collapseQueryStringParam" class="accordion-collapse collapse" aria-labelledby="queryStringParam" data-bs-parent="#notes">
+                <div class="accordion-body h6">
+                    <text class="font-monospace">date</text> : the date (in the format yyyyMMdd) to retrieve. Example <text class="font-monospace">/contents/container?containerName=neudocuments&date=20230423</text>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <br />
 <table class="table">
