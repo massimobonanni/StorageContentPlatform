@@ -8,6 +8,6 @@ namespace StorageContentPlatform.ContentCreator.Interfaces
 {
     public interface IPersistanceProvider
     {
-        Task<bool> SaveContentAsync(string contentName, string content);
+        Task<bool> SaveContentAsync(string contentName, string content, IDictionary<string, string> metadata = null);
     }
 }

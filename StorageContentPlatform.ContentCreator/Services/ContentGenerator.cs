@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using StorageContentPlatform.ContentCreator.Interfaces;
+using StorageContentPlatform.ContentCreator.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,6 @@ namespace StorageContentPlatform.ContentCreator.Services
 {
     public class ContentGenerator : IContentGenerator
     {
-
         private class Configuration
         {
             public int BlobMinimumSizeInKb { get; set; }
@@ -50,10 +50,12 @@ namespace StorageContentPlatform.ContentCreator.Services
                     strBuild.AppendLine(sentence);
                 }
 
-                var contentName = @$"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid()}.txt";
+                var contentId= Guid.NewGuid();
+                var contentName = @$"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{contentId}.txt";
+                var metadata= MetadataGenerator.GenerateMetadata(contentId);
 
                 this.logger.LogInformation("Saving content {ContentName} with size {Size} bytes", contentName, size);
-                await persistanceProvider.SaveContentAsync(contentName, strBuild.ToString());
+                await persistanceProvider.SaveContentAsync(contentName, strBuild.ToString(),metadata);
                 this.logger.LogInformation("Saved content {ContentName} with size {Size} bytes", contentName, size);
 
                 strBuild.Clear();

@@ -28,7 +28,8 @@ namespace StorageContentPlatform.ContentCreator.Services
             this.configurationValues = new Configuration();
         }
 
-        public async Task<bool> SaveContentAsync(string contentName, string content)
+        public async Task<bool> SaveContentAsync(string contentName, string content,
+            IDictionary<string, string> metadata = null)
         {
             var result = true;
             LoadConfig();
@@ -40,6 +41,8 @@ namespace StorageContentPlatform.ContentCreator.Services
                 BlobClient blob = container.GetBlobClient(contentName);
 
                 await blob.UploadAsync(BinaryData.FromString(content), overwrite: true);
+                if (metadata != null && metadata.Any())
+                    await blob.SetMetadataAsync(metadata);
             }
             catch
             {
