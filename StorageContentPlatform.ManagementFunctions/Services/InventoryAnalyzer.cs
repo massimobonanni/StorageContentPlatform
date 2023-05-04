@@ -90,6 +90,10 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                                             result.ObjectInCoolCount++;
                                             result.TotalObjectInCoolSize += blobSize;
                                             break;
+                                        case "cold":
+                                            result.ObjectInColdCount++;
+                                            result.TotalObjectInColdSize += blobSize;
+                                            break;
                                         case "archive":
                                             result.ObjectInArchiveCount++;
                                             result.TotalObjectInArchiveSize += blobSize;

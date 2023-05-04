@@ -16,6 +16,8 @@ namespace StorageContentPlatform.ManagementFunctions.Entities
         public long TotalObjectInHotSize { get; set; }
         public long ObjectInCoolCount { get; set; }
         public long TotalObjectInCoolSize { get; set; }
+        public long ObjectInColdCount { get; set; }
+        public long TotalObjectInColdSize { get; set; }
         public long ObjectInArchiveCount { get; set; }
         public long TotalObjectInArchiveSize { get; set; }
     }

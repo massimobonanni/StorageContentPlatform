@@ -43,6 +43,8 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 this.TotalObjectSize = statistics.TotalObjectSize;
                 this.TotalObjectInCoolSize = statistics.TotalObjectInCoolSize;
                 this.ObjectInCoolCount = statistics.ObjectInCoolCount;
+                this.TotalObjectInColdSize = statistics.TotalObjectInColdSize;
+                this.ObjectInColdCount = statistics.ObjectInColdCount;
                 this.TotalObjectInHotSize = statistics.TotalObjectInHotSize;
                 this.ObjectInHotCount = statistics.ObjectInHotCount;
                 this.TotalObjectInArchiveSize = statistics.TotalObjectInArchiveSize;
@@ -57,6 +59,8 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             public long TotalObjectInHotSize { get; set; }
             public long ObjectInCoolCount { get; set; }
             public long TotalObjectInCoolSize { get; set; }
+            public long ObjectInColdCount { get; set; }
+            public long TotalObjectInColdSize { get; set; }
             public long ObjectInArchiveCount { get; set; }
             public long TotalObjectInArchiveSize { get; set; }
         }
