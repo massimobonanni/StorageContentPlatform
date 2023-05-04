@@ -37,10 +37,10 @@ namespace StorageContentPlatform.Web.Controllers
             var statistics = await this._statisticsService.GetStatisticsAsync(toFilter,fromFilter);
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("InventoryDate,TotalBlobs,TotalSizeBlobs,HotBlobs,HotSizeBlobs,CoolBlobs,CoolSizeBlobs,ArchiveBlobs,ArchiveSizeBlobs");
+            sb.AppendLine("InventoryDate,TotalBlobs,TotalSizeBlobs,HotBlobs,HotSizeBlobs,CoolBlobs,CoolSizeBlobs,ColdBlobs,ColdSizeBlobs,ArchiveBlobs,ArchiveSizeBlobs");
             foreach (var item in statistics)
             {
-                sb.AppendLine($"{item.InventoryCompletionTime:dd/MM/yyyy HH:mm:ss},{item.ObjectCount},{item.TotalObjectSizeInMBytes},{item.ObjectInHotCount},{item.TotalObjectInHotSizeInMBytes},{item.ObjectInCoolCount},{item.TotalObjectInCoolSizeInMBytes},{item.ObjectInArchiveCount},{item.TotalObjectInArchiveSizeInMBytes}");
+                sb.AppendLine($"{item.InventoryCompletionTime:dd/MM/yyyy HH:mm:ss},{item.ObjectCount},{item.TotalObjectSizeInMBytes},{item.ObjectInHotCount},{item.TotalObjectInHotSizeInMBytes},{item.ObjectInCoolCount},{item.TotalObjectInCoolSizeInMBytes},{item.ObjectInColdCount},{item.TotalObjectInColdSizeInMBytes},{item.ObjectInArchiveCount},{item.TotalObjectInArchiveSizeInMBytes}");
             }
             return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "statistics.csv");
         }
