@@ -38,7 +38,6 @@ namespace StorageContentPlatform.Web.Services
             var tableClient=tableServiceClient.GetTableClient(this.configurationValues.StatisticTableName);
             var queryResult =  tableClient
                 .QueryAsync<StatisticData>(s => s.InventoryStartTime <= to && s.InventoryStartTime >= from)
-                //.QueryAsync<StatisticData>()
                 .AsPages(default, 100);
 
             await foreach (var tablePage in queryResult)

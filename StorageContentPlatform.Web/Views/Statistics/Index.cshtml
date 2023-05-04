@@ -56,6 +56,7 @@
             <th>Total</th>
             <th>Hot Tier</th>
             <th>Cool Tier</th>
+            <th>Cold Tier</th>
             <th>Archive Tier</th>
         </tr>
     </thead>
@@ -80,6 +81,11 @@
                     @item.ObjectInCoolCount blobs
                     <br />
                     @item.TotalObjectInCoolSizeInMBytes Mb
+                </td>
+                <td>
+                    @item.ObjectInColdCount blobs
+                    <br />
+                    @item.TotalObjectInColdSizeInMBytes Mb
                 </td>
                 <td>
                     @item.ObjectInArchiveCount blobs
