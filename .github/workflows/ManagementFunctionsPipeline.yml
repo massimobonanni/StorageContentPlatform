@@ -6,19 +6,19 @@ on:
     branches: 
       - "main"
     paths:
-      - "StorageContentPlatform.ContentCreator/**"
+      - "StorageContentPlatform.ManagementFunctions/**"
   pull_request:
     branches: 
       - "main"
     paths:
-      - "StorageContentPlatform.ContentCreator/**"
+      - "StorageContentPlatform.ManagementFunctions/**"
 
 env: 
-  REGION1_FUNCTION_APP_NAME: "scpneucontentgenerator"
-  REGION2_FUNCTION_APP_NAME: "scpeuscontentgenerator"
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/StorageContentPlatform.ContentCreator'
+  REGION1_FUNCTION_APP_NAME: "scpneumanagement"
+  REGION2_FUNCTION_APP_NAME: "scpeusmanagement"
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/StorageContentPlatform.ManagementFunctions'
   BUILD_OUTPUT_PATH: '${{ github.workspace }}/build-artifacts'
-  BUILD_PACKAGE_NAME: 'contentcreator.zip'
+  BUILD_PACKAGE_NAME: 'managementfunctions.zip'
   
 jobs:
   build:
@@ -71,7 +71,7 @@ jobs:
       with:
         app-name: ${{ env.REGION1_FUNCTION_APP_NAME }}
         package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
-        publish-profile: ${{ secrets.CONTENTGENERATOR_REGION1_PUBLISH_PROFILE }}
+        publish-profile: ${{ secrets.MANAGEMENTFUNCTIONS_REGION1_PUBLISH_PROFILE }}
 
   deployToRegion2:
     runs-on: ubuntu-latest
@@ -88,4 +88,4 @@ jobs:
       with:
         app-name: ${{ env.REGION2_FUNCTION_APP_NAME }}
         package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
-        publish-profile: ${{ secrets.CONTENTGENERATOR_REGION2_PUBLISH_PROFILE }}
+        publish-profile: ${{ secrets.MANAGEMENTFUNCTIONS_REGION2_PUBLISH_PROFILE }}
