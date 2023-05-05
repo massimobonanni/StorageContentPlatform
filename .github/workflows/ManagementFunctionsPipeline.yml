@@ -1,4 +1,4 @@
-name: Content Generator component
+name: Management Functions component
 
 on:
   workflow_dispatch:
