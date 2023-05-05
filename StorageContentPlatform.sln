@@ -7,7 +7,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StorageContentPlatform.Cont
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StorageContentPlatform.ManagementFunctions", "StorageContentPlatform.ManagementFunctions\StorageContentPlatform.ManagementFunctions.csproj", "{D7F6551E-D846-4E88-8064-F42AEBF84006}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorageContentPlatform.Web", "StorageContentPlatform.Web\StorageContentPlatform.Web.csproj", "{0E54EB03-69F8-4DB7-8862-1B5B26835D2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StorageContentPlatform.Web", "StorageContentPlatform.Web\StorageContentPlatform.Web.csproj", "{0E54EB03-69F8-4DB7-8862-1B5B26835D2C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{6B9CE938-B52C-447E-B460-75E0EFC9B370}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{BBB38E23-47D3-4BDF-A656-F7679B71C0CF}"
+	ProjectSection(SolutionItems) = preProject
+		ContentGeneratorPipeline.yml = ContentGeneratorPipeline.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +37,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BBB38E23-47D3-4BDF-A656-F7679B71C0CF} = {6B9CE938-B52C-447E-B460-75E0EFC9B370}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4BDF75EB-02EB-4AB5-A4F8-2585A7DA9B01}
