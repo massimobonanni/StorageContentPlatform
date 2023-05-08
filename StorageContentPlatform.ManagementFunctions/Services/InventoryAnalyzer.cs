@@ -34,7 +34,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
         private void LoadConfig()
         {
             this.configurationValues.InventoryStorageConnectionString = this.configuration.GetValue<string>("InventoryStorageConnectionString");
-            this.configurationValues.MetadataFields = this.configuration.GetValue<string>("MetadataFields").Split("|");
+            this.configurationValues.MetadataFields = this.configuration.GetValue<string>("MetadataFields").Split("|",StringSplitOptions.RemoveEmptyEntries);
         }
 
         private const string ContentLengthColumn = "Content-Length";
@@ -126,7 +126,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             }
         }
 
-        private static void ManageAccessTierCounters(InventoryStatistics result, int contentLengthColumnIndex, int accessTierColumnIndex, string[] fields)
+        private void ManageAccessTierCounters(InventoryStatistics result, int contentLengthColumnIndex, int accessTierColumnIndex, string[] fields)
         {
             var accessTier = fields[accessTierColumnIndex].ToLower();
             var blobSize = long.Parse(fields[contentLengthColumnIndex]);
