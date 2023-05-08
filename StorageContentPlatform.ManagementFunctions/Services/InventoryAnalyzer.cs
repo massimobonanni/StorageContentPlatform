@@ -53,19 +53,19 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                     result = new InventoryStatistics();
                     result.InventoryStartTime = manifest.InventoryStartTime;
                     result.InventoryCompletionTime = manifest.InventoryCompletionTime;
-                    
+
                     foreach (var file in manifest.Files)
                     {
                         var blobClient = new BlobClient(this.configurationValues.InventoryStorageConnectionString,
                             manifest.DestinationContainer, file.Blob);
                         var blobContent = await blobClient.DownloadContentAsync();
-                       
+
                         using (TextFieldParser parser = new TextFieldParser(blobContent.Value.Content.ToStream()))
                         {
                             parser.TextFieldType = FieldType.Delimited;
                             parser.SetDelimiters(",");
                             var rowIndex = 0;
-                            int contentLengthColumnIndex = 0, accessTierColumnIndex = 0, metadataColumnIndex=0 ;
+                            int contentLengthColumnIndex = 0, accessTierColumnIndex = 0, metadataColumnIndex = 0;
                             while (!parser.EndOfData)
                             {
                                 //Processing row
@@ -85,11 +85,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                                 else
                                 {
                                     ManageAccessTierCounters(result, contentLengthColumnIndex, accessTierColumnIndex, fields);
-
-                                    //var metadataField = fields[metadataColumnIndex];
-                                    //var metadataColumn = JsonSerializer.Deserialize<Dictionary<string, string>>(metadataField);
-
-
+                                    ManageMetadataCounters(result, metadataColumnIndex, fields);
                                 }
                                 rowIndex++;
                             }
@@ -102,6 +98,32 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 }
             }
             return result;
+        }
+
+        private void ManageMetadataCounters(InventoryStatistics result, int metadataColumnIndex, string[] fields)
+        {
+            var metadataField = fields[metadataColumnIndex];
+            var metadataColumn = JsonSerializer.Deserialize<Dictionary<string, string>>(metadataField);
+
+            foreach (var item in this.configurationValues.MetadataFields)
+            {
+                if (metadataColumn.ContainsKey(item))
+                {
+                    var metadataValue = metadataColumn[item];
+
+                    if (!result.MetadataList.ContainsKey(item))
+                        result.MetadataList.Add(item, new Metadata() { Label = item });
+
+                    if (!result.MetadataList[item].Counters.ContainsKey(metadataValue))
+                    {
+                        result.MetadataList[item].Counters.Add(metadataValue, 1);
+                    }
+                    else
+                    {
+                        result.MetadataList[item].Counters[metadataValue]++;
+                    }
+                }
+            }
         }
 
         private static void ManageAccessTierCounters(InventoryStatistics result, int contentLengthColumnIndex, int accessTierColumnIndex, string[] fields)
