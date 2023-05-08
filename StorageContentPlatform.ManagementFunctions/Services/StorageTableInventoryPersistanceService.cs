@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 using StorageContentPlatform.ManagementFunctions.Entities;
 using StorageContentPlatform.ManagementFunctions.Interfaces;
 using System;
@@ -63,6 +64,25 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             public long TotalObjectInColdSize { get; set; }
             public long ObjectInArchiveCount { get; set; }
             public long TotalObjectInArchiveSize { get; set; }
+
+            [IgnoreProperty()]
+            public IDictionary<string,Metadata> MetadataList { get; set; }
+
+            public override IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+            {
+                var x =base.WriteEntity(operationContext);
+                x[nameof(this.MetadataList)] = new EntityProperty(JsonConvert.SerializeObject(this.MetadataList));
+                return x;
+            }
+
+            public override void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+            {
+                base.ReadEntity(properties, operationContext);
+                if (properties.ContainsKey(nameof(this.MetadataList)))
+                {
+                    this.MetadataList = JsonConvert.DeserializeObject<Dictionary<string,Metadata>>(properties[nameof(this.MetadataList)].StringValue);
+                }
+            }
         }
 
         private readonly IConfiguration configuration;
