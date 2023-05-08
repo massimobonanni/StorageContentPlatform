@@ -1,0 +1,91 @@
+name: FrontEnd component
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - "main"
+    paths:
+      - "StorageContentPlatform.Web/**"
+  pull_request:
+    branches: 
+      - "main"
+    paths:
+      - "StorageContentPlatform.Web/**"
+
+env: 
+  REGION1_APP_NAME: "neucontentwebsite"
+  REGION2_APP_NAME: "euscontentwebsite"
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/StorageContentPlatform.Web'
+  BUILD_OUTPUT_PATH: '${{ github.workspace }}/build-artifacts'
+  BUILD_PACKAGE_NAME: 'frontend.zip'
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    
+    - name: Publish
+      run: |
+        publishfolder="${{ github.workspace }}/output"
+        mkdir $publishfolder
+        cd $publishfolder
+        dotnet publish ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }} --configuration Release --output .
+        mkdir ${{ env.BUILD_OUTPUT_PATH }}
+        zip -r ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} .
+        
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: build_artifacts
+        path: ${{ env.BUILD_OUTPUT_PATH }}
+        if-no-files-found: error
+        
+  deployToRegion1:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: build_artifacts
+        path: ${{ env.BUILD_OUTPUT_PATH }}
+
+    - name: Deploy ${{ env.REGION1_APP_NAME }}
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ env.REGION1_APP_NAME }} 
+        publish-profile: ${{ secrets.FRONTEND_REGION1_PUBLISH_PROFILE }} 
+        package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
+
+  deployToRegion2:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: build_artifacts
+        path: ${{ env.BUILD_OUTPUT_PATH }}
+
+    - name: Deploy ${{ env.REGION2_APP_NAME }}
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ env.REGION2_APP_NAME }} 
+        publish-profile: ${{ secrets.FRONTEND_REGION2_PUBLISH_PROFILE }} 
+        package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} 
