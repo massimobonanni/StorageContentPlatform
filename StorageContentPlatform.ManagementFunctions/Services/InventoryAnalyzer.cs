@@ -19,6 +19,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
         private class Configuration
         {
             public string InventoryStorageConnectionString { get; set; }
+            public IEnumerable<string> MetadataFields { get; set; }
         }
 
         private readonly IConfiguration configuration;
@@ -33,10 +34,12 @@ namespace StorageContentPlatform.ManagementFunctions.Services
         private void LoadConfig()
         {
             this.configurationValues.InventoryStorageConnectionString = this.configuration.GetValue<string>("InventoryStorageConnectionString");
+            this.configurationValues.MetadataFields = this.configuration.GetValue<string>("MetadataFields").Split("|");
         }
 
         private const string ContentLengthColumn = "Content-Length";
         private const string AccessTierColumn = "AccessTier";
+        private const string MetadataColumn = "Metadata";
 
         public async Task<InventoryStatistics> AnalyzeAsync(InventoryManifest manifest)
         {
@@ -62,7 +65,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                             parser.TextFieldType = FieldType.Delimited;
                             parser.SetDelimiters(",");
                             var rowIndex = 0;
-                            int contentLengthColumnIndex = 0, accessTierColumnIndex = 0;
+                            int contentLengthColumnIndex = 0, accessTierColumnIndex = 0, metadataColumnIndex=0 ;
                             while (!parser.EndOfData)
                             {
                                 //Processing row
@@ -75,32 +78,18 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                                     accessTierColumnIndex = fields.Select((elem, index) => new { elem, index })
                                             .First(p => p.elem == AccessTierColumn)
                                             .index;
+                                    metadataColumnIndex = fields.Select((elem, index) => new { elem, index })
+                                            .First(p => p.elem == MetadataColumn)
+                                            .index;
                                 }
                                 else
                                 {
-                                    var accessTier = fields[accessTierColumnIndex].ToLower();
-                                    var blobSize = long.Parse(fields[contentLengthColumnIndex]);
-                                    switch (accessTier)
-                                    {
-                                        case "hot":
-                                            result.ObjectInHotCount++;
-                                            result.TotalObjectInHotSize += blobSize;
-                                            break;
-                                        case "cool":
-                                            result.ObjectInCoolCount++;
-                                            result.TotalObjectInCoolSize += blobSize;
-                                            break;
-                                        case "cold":
-                                            result.ObjectInColdCount++;
-                                            result.TotalObjectInColdSize += blobSize;
-                                            break;
-                                        case "archive":
-                                            result.ObjectInArchiveCount++;
-                                            result.TotalObjectInArchiveSize += blobSize;
-                                            break;
-                                    }
-                                    result.ObjectCount++;
-                                    result.TotalObjectSize += blobSize;
+                                    ManageAccessTierCounters(result, contentLengthColumnIndex, accessTierColumnIndex, fields);
+
+                                    //var metadataField = fields[metadataColumnIndex];
+                                    //var metadataColumn = JsonSerializer.Deserialize<Dictionary<string, string>>(metadataField);
+
+
                                 }
                                 rowIndex++;
                             }
@@ -113,6 +102,33 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 }
             }
             return result;
+        }
+
+        private static void ManageAccessTierCounters(InventoryStatistics result, int contentLengthColumnIndex, int accessTierColumnIndex, string[] fields)
+        {
+            var accessTier = fields[accessTierColumnIndex].ToLower();
+            var blobSize = long.Parse(fields[contentLengthColumnIndex]);
+            switch (accessTier)
+            {
+                case "hot":
+                    result.ObjectInHotCount++;
+                    result.TotalObjectInHotSize += blobSize;
+                    break;
+                case "cool":
+                    result.ObjectInCoolCount++;
+                    result.TotalObjectInCoolSize += blobSize;
+                    break;
+                case "cold":
+                    result.ObjectInColdCount++;
+                    result.TotalObjectInColdSize += blobSize;
+                    break;
+                case "archive":
+                    result.ObjectInArchiveCount++;
+                    result.TotalObjectInArchiveSize += blobSize;
+                    break;
+            }
+            result.ObjectCount++;
+            result.TotalObjectSize += blobSize;
         }
     }
 }
