@@ -20,5 +20,6 @@ namespace StorageContentPlatform.ManagementFunctions.Entities
         public long TotalObjectInColdSize { get; set; }
         public long ObjectInArchiveCount { get; set; }
         public long TotalObjectInArchiveSize { get; set; }
+        public ICollection<Metadata> MetadataList { get; set; } = new List<Metadata>();
     }
 }
