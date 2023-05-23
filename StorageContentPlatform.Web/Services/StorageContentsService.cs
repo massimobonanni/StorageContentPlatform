@@ -13,7 +13,7 @@ namespace StorageContentPlatform.Web.Services
         {
             public string StorageConnectionString { get; set; }
 
-            public IEnumerable<string> ContentContainers { get; set; }
+            public IEnumerable<string> ContainerTypes { get; set; }
         }
 
         private readonly IConfiguration configuration;
@@ -28,7 +28,8 @@ namespace StorageContentPlatform.Web.Services
         private void LoadConfig()
         {
             this.configurationValues.StorageConnectionString = this.configuration.GetValue<string>("StorageConnectionString");
-            this.configurationValues.ContentContainers = this.configuration.GetValue<string>("ContentContainers")
+            this.configurationValues.ContainerTypes = this.configuration.GetValue<string>("ContainerTypes")
+                    .ToLower()
                     .Split("|", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
         }
 
@@ -47,7 +48,7 @@ namespace StorageContentPlatform.Web.Services
             {
                 foreach (BlobContainerItem containerItem in containerPage.Values)
                 {
-                    if (this.configurationValues.ContentContainers.Contains(containerItem.Name))
+                    if (containerItem.HasMetadataValues("containerType",this.configurationValues.ContainerTypes))
                     {
                         var containerInfo = new ContainerInfo();
                         containerInfo.Name = containerItem.Name;

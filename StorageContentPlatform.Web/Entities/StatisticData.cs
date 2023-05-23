@@ -1,13 +1,13 @@
 ﻿
 using Azure;
 using Azure.Data.Tables;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace StorageContentPlatform.Web.Entities
 {
     public class StatisticData : ITableEntity
     {
-
         public DateTimeOffset InventoryCompletionTime { get; set; }
         public DateTimeOffset InventoryStartTime { get; set; }
         public long ObjectCount { get; set; }
@@ -25,6 +25,7 @@ namespace StorageContentPlatform.Web.Entities
         public long ObjectInArchiveCount { get; set; }
         public long TotalObjectInArchiveSize { get; set; }
         public long TotalObjectInArchiveSizeInMBytes { get => (long)Math.Round(TotalObjectInArchiveSize / 1048576.0, 0); }
+
         public string PartitionKey { get ; set ; }
         public string RowKey { get ; set ; }
         public DateTimeOffset? Timestamp { get; set ; }
