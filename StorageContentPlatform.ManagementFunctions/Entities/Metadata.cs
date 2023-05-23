@@ -10,6 +10,6 @@ namespace StorageContentPlatform.ManagementFunctions.Entities
     {
         public string Label { get; set; }
 
-        public IDictionary<string, long> Counters { get; set; } = new Dictionary<string, long>()
+        public IDictionary<string, long> Counters { get; set; } = new Dictionary<string, long>();
     }
 }
