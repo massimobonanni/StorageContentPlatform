@@ -58,6 +58,7 @@
             <th>Cool Tier</th>
             <th>Cold Tier</th>
             <th>Archive Tier</th>
+            <th>Metadata</th>
             <th></th>
         </tr>
     </thead>
@@ -92,6 +93,16 @@
                     @item.ObjectInArchiveCount blobs
                     <br />
                     @item.TotalObjectInArchiveSizeInMBytes Mb
+                </td>
+                <td>
+                    @if(item.MetadataList!= null && item.MetadataList.Any())
+                    {
+                        <text>Yes</text>
+                    }
+                    else
+                    {
+                        <text>No</text>
+                    }
                 </td>
                 <td>
                     <a asp-action="Detail" asp-route-date="@item.InventoryStartTime.ToString("dd-MM-yyyy")">Detail</a>
