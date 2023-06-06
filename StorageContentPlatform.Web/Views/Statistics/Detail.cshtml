@@ -1,0 +1,88 @@
+﻿@model StorageContentPlatform.Web.Models.StatisticsController.DetailViewModel
+
+@{
+    ViewData["Title"] = $"Daily Statistics {Model.Date:dd/MM/yyyy}";
+}
+
+<h3>Daily Statistics</h3>
+
+<div>
+    <h4>Date: @Model.Date.ToString("dd/MM/yyyy")</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Total objects
+        </dt>
+        <dd class="col-sm-10">
+            @Model.StatisticData.ObjectCount (@Model.StatisticData.TotalObjectSizeInMBytes MB)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Hot Tier
+        </dt>
+        <dd class="col-sm-10">
+            @Model.StatisticData.ObjectInHotCount (@Model.StatisticData.TotalObjectInHotSizeInMBytes MB)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Hot Tier
+        </dt>
+        <dd class="col-sm-10">
+            @Model.StatisticData.ObjectInCoolCount (@Model.StatisticData.TotalObjectInCoolSizeInMBytes MB)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Hot Tier
+        </dt>
+        <dd class="col-sm-10">
+            @Model.StatisticData.ObjectInColdCount (@Model.StatisticData.TotalObjectInColdSizeInMBytes MB)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Hot Tier
+        </dt>
+        <dd class="col-sm-10">
+            @Model.StatisticData.ObjectInArchiveCount (@Model.StatisticData.TotalObjectInArchiveSizeInMBytes MB)
+        </dd>
+    </dl>
+    <hr />
+    @if (Model.StatisticData != null && Model.StatisticData.MetadataList != null)
+    {
+        @foreach (var metadata in Model.StatisticData.MetadataList)
+        {
+            <dl class="row">
+                <dt class="col-sm-2">
+                    @metadata.Key
+                </dt>
+                <dd class="col-sm-10">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        @foreach (var item in metadata.Value.Counters)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Key
+                                </td>
+                                <td>
+                                    @item.Value
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </dd>
+            </dl>
+            <hr />
+        }
+    }
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>

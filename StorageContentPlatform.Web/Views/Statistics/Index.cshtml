@@ -58,6 +58,7 @@
             <th>Cool Tier</th>
             <th>Cold Tier</th>
             <th>Archive Tier</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -91,6 +92,9 @@
                     @item.ObjectInArchiveCount blobs
                     <br />
                     @item.TotalObjectInArchiveSizeInMBytes Mb
+                </td>
+                <td>
+                    <a asp-action="Detail" asp-route-date="@item.InventoryStartTime.ToString("dd-MM-yyyy")">Detail</a>
                 </td>
             </tr>
         }

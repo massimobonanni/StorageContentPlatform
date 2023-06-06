@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StorageContentPlatform.Web.Interfaces;
 using StorageContentPlatform.Web.Models.StatisticsController;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 
@@ -28,13 +29,22 @@ namespace StorageContentPlatform.Web.Controllers
             return View(model);
         }
 
+        public async Task<ActionResult> Detail(string date)
+        {
+            var model = new DetailViewModel();
+            model.Date = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var statistics = await this._statisticsService.GetStatisticsAsync(model.Date, model.Date);
+            model.StatisticData = statistics.FirstOrDefault();
+            return View(model);
+        }
+
         // write an action to export a csv file with the statistics 
         // GET: StatisticsController/Export?dayHistory=30
         public async Task<ActionResult> Export(int dayHistory = 30)
         {
             var toFilter = DateTime.Now;
             var fromFilter = toFilter.AddDays(-dayHistory);
-            var statistics = await this._statisticsService.GetStatisticsAsync(toFilter,fromFilter);
+            var statistics = await this._statisticsService.GetStatisticsAsync(toFilter, fromFilter);
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("InventoryDate,TotalBlobs,TotalSizeBlobs,HotBlobs,HotSizeBlobs,CoolBlobs,CoolSizeBlobs,ColdBlobs,ColdSizeBlobs,ArchiveBlobs,ArchiveSizeBlobs");
