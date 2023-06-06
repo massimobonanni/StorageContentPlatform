@@ -50,6 +50,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 this.ObjectInHotCount = statistics.ObjectInHotCount;
                 this.TotalObjectInArchiveSize = statistics.TotalObjectInArchiveSize;
                 this.ObjectInArchiveCount = statistics.ObjectInArchiveCount;
+                this.MetadataList = statistics.MetadataList;
             }
 
             public DateTimeOffset InventoryCompletionTime { get; set; }
@@ -66,12 +67,15 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             public long TotalObjectInArchiveSize { get; set; }
 
             [IgnoreProperty()]
-            public IDictionary<string,Metadata> MetadataList { get; set; }
+            public IDictionary<string, Metadata> MetadataList { get; set; }
 
             public override IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
             {
-                var x =base.WriteEntity(operationContext);
-                x[nameof(this.MetadataList)] = new EntityProperty(JsonConvert.SerializeObject(this.MetadataList));
+                var x = base.WriteEntity(operationContext);
+                if (this.MetadataList != null)
+                    x[nameof(this.MetadataList)] = new EntityProperty(JsonConvert.SerializeObject(this.MetadataList));
+                else
+                    x[nameof(this.MetadataList)] = null;
                 return x;
             }
 
@@ -80,7 +84,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 base.ReadEntity(properties, operationContext);
                 if (properties.ContainsKey(nameof(this.MetadataList)))
                 {
-                    this.MetadataList = JsonConvert.DeserializeObject<Dictionary<string,Metadata>>(properties[nameof(this.MetadataList)].StringValue);
+                    this.MetadataList = JsonConvert.DeserializeObject<Dictionary<string, Metadata>>(properties[nameof(this.MetadataList)].StringValue);
                 }
             }
         }
@@ -111,7 +115,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 var cloudStorageAccount = CloudStorageAccount.Parse(this.configurationValues.StatisticsStorageConnectionString);
                 var tableClient = cloudStorageAccount.CreateCloudTableClient();
                 var table = tableClient.GetTableReference(this.configurationValues.StatisticsTableName);
-                
+
                 TableOperation operation = TableOperation.Insert(entity);
                 var insertResult = await table.ExecuteAsync(operation, default, default, default);
                 result = insertResult.HttpStatusCode == 200 || insertResult.HttpStatusCode == 204;
@@ -135,9 +139,9 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                     containername, blobName);
                 var blobContent = await blobClient.DownloadContentAsync();
                 result = blobContent?.Value?.Content?.ToObjectFromJson<InventoryManifest>(new JsonSerializerOptions()
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             }
             catch
             {
