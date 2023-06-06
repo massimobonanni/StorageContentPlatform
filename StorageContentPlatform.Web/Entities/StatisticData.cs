@@ -1,12 +1,11 @@
-﻿
-using Azure;
+﻿using Azure;
 using Azure.Data.Tables;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace StorageContentPlatform.Web.Entities
 {
-    public class StatisticData : ITableEntity
+    public class StatisticData
     {
         public DateTimeOffset InventoryCompletionTime { get; set; }
         public DateTimeOffset InventoryStartTime { get; set; }
@@ -26,9 +25,16 @@ namespace StorageContentPlatform.Web.Entities
         public long TotalObjectInArchiveSize { get; set; }
         public long TotalObjectInArchiveSizeInMBytes { get => (long)Math.Round(TotalObjectInArchiveSize / 1048576.0, 0); }
 
-        public string PartitionKey { get ; set ; }
-        public string RowKey { get ; set ; }
         public DateTimeOffset? Timestamp { get; set ; }
-        public ETag ETag { get ; set ; }
+
+    
+        public IDictionary<string, Metadata> MetadataList { get; set; }
+    }
+
+    public class Metadata
+    {
+        public string Label { get; set; }
+
+        public IDictionary<string, long> Counters { get; set; } = new Dictionary<string, long>();
     }
 }

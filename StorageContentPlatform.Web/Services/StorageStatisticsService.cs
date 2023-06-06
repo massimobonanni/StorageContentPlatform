@@ -5,7 +5,7 @@ using StorageContentPlatform.Web.Interfaces;
 
 namespace StorageContentPlatform.Web.Services
 {
-    public class StorageStatisticsService:IStatisticsService
+    public class StorageStatisticsService : IStatisticsService
     {
         private class Configuration
         {
@@ -34,19 +34,22 @@ namespace StorageContentPlatform.Web.Services
             var result = new List<StatisticData>();
             LoadConfig();
 
-            var tableServiceClient = new TableServiceClient(this.configurationValues.StorageConnectionString);
-            var tableClient=tableServiceClient.GetTableClient(this.configurationValues.StatisticTableName);
-            var queryResult =  tableClient
-                .QueryAsync<StatisticData>(s => s.InventoryStartTime <= to && s.InventoryStartTime >= from)
-                .AsPages(default, 100);
+            var filterString=$"InventoryStartTime ge datetime'{from.ToString("yyyy-MM-ddT00:00:00Z")}' and InventoryStartTime le datetime'{to.ToString("yyyy-MM-ddT23:59:59Z")}'";
 
+            var tableServiceClient = new TableServiceClient(this.configurationValues.StorageConnectionString);
+            var tableClient = tableServiceClient.GetTableClient(this.configurationValues.StatisticTableName);
+            var queryResult = tableClient
+                .QueryAsync<TableEntity>(filterString)
+                .AsPages(default, 100);
+            
             await foreach (var tablePage in queryResult)
             {
                 foreach (var tableItem in tablePage.Values)
                 {
-                    result.Add(tableItem);
+                    result.Add(tableItem.ToStatisticData());
                 }
             }
+            
             return result.OrderByDescending(s => s.InventoryStartTime);
         }
     }

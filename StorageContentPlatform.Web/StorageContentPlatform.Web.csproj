@@ -10,6 +10,7 @@
 		<PackageReference Include="Azure.Data.Tables" Version="12.7.1" />
 		<PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.11" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Update="appsettings.local.json" CopyToPublishDirectory="Never" />
