@@ -31,10 +31,14 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             this.configurationValues = new Configuration();
         }
 
+        private static char[] MetadataSeparator = { ';',';',',' };
+
         private void LoadConfig()
         {
             this.configurationValues.InventoryStorageConnectionString = this.configuration.GetValue<string>("InventoryStorageConnectionString");
-            this.configurationValues.MetadataFields = this.configuration.GetValue<string>("MetadataFields").Split("|",StringSplitOptions.RemoveEmptyEntries);
+            this.configurationValues.MetadataFields = this.configuration
+                .GetValue<string>("MetadataFields")
+                .Split(MetadataSeparator, StringSplitOptions.RemoveEmptyEntries);
         }
 
         private const string ContentLengthColumn = "Content-Length";
