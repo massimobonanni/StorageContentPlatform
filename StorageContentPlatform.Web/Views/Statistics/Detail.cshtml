@@ -59,20 +59,20 @@
                     @metadata.Key
                 </dt>
                 <dd class="col-sm-10">
-                    <table>
+                    <table class="table-bordered table-striped" style="min-width:150px">
                         <thead>
-                            <tr>
+                            <tr >
                                 <th>Label</th>
                                 <th>Count</th>
                             </tr>
                         </thead>
                         @foreach (var item in metadata.Value.Counters)
                         {
-                            <tr>
-                                <td>
+                            <tr >
+                                <td style="padding-left:10px;padding-right:10px">
                                     @item.Key
                                 </td>
-                                <td>
+                                <td style="padding-left:10px;padding-right:10px">
                                     @item.Value
                                 </td>
                             </tr>
