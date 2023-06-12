@@ -33,7 +33,7 @@ namespace StorageContentPlatform.Web.Services
                     .Split("|", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
         }
 
-        public async Task<IEnumerable<ContainerInfo>> GetContainersAsync()
+        public async Task<IEnumerable<ContainerInfo>> GetContainersAsync(CancellationToken cancellationToken = default)
         {
             var result = new List<ContainerInfo>();
             LoadConfig();
@@ -41,7 +41,7 @@ namespace StorageContentPlatform.Web.Services
             var blobServiceClient = CreateBlobServiceClient();
 
             var resultSegment = blobServiceClient
-                    .GetBlobContainersAsync(BlobContainerTraits.Metadata, null, default)
+                    .GetBlobContainersAsync(BlobContainerTraits.Metadata, null,cancellationToken)
                     .AsPages(default, 100);
 
             await foreach (Azure.Page<BlobContainerItem> containerPage in resultSegment)
@@ -64,7 +64,7 @@ namespace StorageContentPlatform.Web.Services
             return result;
         }
 
-        public async Task<IEnumerable<Entities.BlobInfo>> GetBlobsAsync(string containerName, DateTime date)
+        public async Task<IEnumerable<Entities.BlobInfo>> GetBlobsAsync(string containerName, DateTime date, CancellationToken cancellationToken = default)
         {
             var result = new List<Entities.BlobInfo>();
             LoadConfig();
@@ -76,7 +76,7 @@ namespace StorageContentPlatform.Web.Services
             var blobPrefix = date.ToString("yyyyMMdd");
 
             var resultSegment = containerClient
-                    .GetBlobsAsync(BlobTraits.All, BlobStates.None, blobPrefix, default)
+                    .GetBlobsAsync(BlobTraits.All, BlobStates.None, blobPrefix, cancellationToken)
                     .AsPages(default, 100);
 
             await foreach (var blobPage in resultSegment)
@@ -90,7 +90,8 @@ namespace StorageContentPlatform.Web.Services
                     blobInfo.ReplicationRuleId = blob.ObjectReplicationSourceProperties?[0].Rules?[0].RuleId;
                     blobInfo.ReplicationStatus = blob.ObjectReplicationSourceProperties?[0].Rules?[0].ReplicationStatus.ToString();
                     blobInfo.Size = blob.Properties.ContentLength;
-                    blobInfo.Tier = blob.Properties.AccessTier.Value.ToString();
+                    blobInfo.Tier = blob.Properties.AccessTier.HasValue ?
+                        blob.Properties.AccessTier.Value.ToString() : null;
 
                     result.Add(blobInfo);
                 }
@@ -98,7 +99,7 @@ namespace StorageContentPlatform.Web.Services
             return result.OrderByDescending(b => b.LastModified);
         }
 
-        public async Task<BlobContent> GetBlobAsync(string containerName, string blobName)
+        public async Task<BlobContent> GetBlobAsync(string containerName, string blobName,CancellationToken cancellationToken)
         {
             var result = new BlobContent();
             result.Name = blobName;
@@ -110,9 +111,15 @@ namespace StorageContentPlatform.Web.Services
 
             var blobClient = containerClient.GetBlobClient(blobName);
 
-            var blobContent = await blobClient.DownloadContentAsync();
+            var blobContent = await blobClient.DownloadContentAsync(cancellationToken);
 
-            result.Content = blobContent.Value.Content.ToString();
+            if (blobContent.HasValue)
+                result.Content = blobContent.Value.Content.ToString();
+
+            var properties = await blobClient.GetPropertiesAsync(null, cancellationToken) ;
+
+            if (properties.HasValue)
+                result.Metadata = properties.Value.Metadata;
 
             return result;
         }

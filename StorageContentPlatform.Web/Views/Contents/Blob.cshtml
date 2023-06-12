@@ -6,6 +6,21 @@
 
 <h3>@Html.ActionLink(Model.ContainerName, "Container", new { containerName = Model.ContainerName })/@Model.Blob.Name</h3>
 <br />
+<hr/>
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Metadata
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var item in Model.Blob.Metadata)
+            {
+                <div>@item.Key = @item.Value</div>
+            }
+        </dd>
+    </dl>
+</div>
+<hr/>
 <div>
     <dl class="row">
         <dt class="col-sm-2">
@@ -15,6 +30,4 @@
             @Model.Blob.Content
         </dd>
     </dl>
-</div>
-<div>
 </div>
