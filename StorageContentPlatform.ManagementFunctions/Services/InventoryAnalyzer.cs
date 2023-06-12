@@ -31,7 +31,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             this.configurationValues = new Configuration();
         }
 
-        private static char[] MetadataSeparator = { ';',';',',' };
+        private static char[] MetadataSeparator = { '|',';',',' };
 
         private void LoadConfig()
         {
