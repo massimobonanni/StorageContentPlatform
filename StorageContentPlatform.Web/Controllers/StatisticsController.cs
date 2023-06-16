@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StorageContentPlatform.Web.Entities;
 using StorageContentPlatform.Web.Interfaces;
 using StorageContentPlatform.Web.Models.StatisticsController;
 using System.Globalization;
@@ -46,13 +47,7 @@ namespace StorageContentPlatform.Web.Controllers
             var fromFilter = toFilter.AddDays(-dayHistory);
             var statistics = await this._statisticsService.GetStatisticsAsync(toFilter, fromFilter);
 
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("InventoryDate,TotalBlobs,TotalSizeBlobs,HotBlobs,HotSizeBlobs,CoolBlobs,CoolSizeBlobs,ColdBlobs,ColdSizeBlobs,ArchiveBlobs,ArchiveSizeBlobs");
-            foreach (var item in statistics)
-            {
-                sb.AppendLine($"{item.InventoryCompletionTime:dd/MM/yyyy HH:mm:ss},{item.ObjectCount},{item.TotalObjectSizeInMBytes},{item.ObjectInHotCount},{item.TotalObjectInHotSizeInMBytes},{item.ObjectInCoolCount},{item.TotalObjectInCoolSizeInMBytes},{item.ObjectInColdCount},{item.TotalObjectInColdSizeInMBytes},{item.ObjectInArchiveCount},{item.TotalObjectInArchiveSizeInMBytes}");
-            }
-            return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "statistics.csv");
+            return File(Encoding.ASCII.GetBytes(statistics.GenerateCSV()), "text/csv", "statistics.csv");
         }
 
     }
