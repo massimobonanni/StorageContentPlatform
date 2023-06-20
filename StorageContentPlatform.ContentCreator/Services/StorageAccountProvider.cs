@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
 using StorageContentPlatform.ContentCreator.Interfaces;
 using System;
@@ -21,9 +22,12 @@ namespace StorageContentPlatform.ContentCreator.Services
 
         private readonly IConfiguration configuration;
         private readonly Configuration configurationValues;
+        private readonly ILogger<StorageAccountProvider> logger;
 
-        public StorageAccountProvider(IConfiguration configuration)
+        public StorageAccountProvider(IConfiguration configuration,
+            ILoggerFactory loggerFactory)
         {
+            this.logger = loggerFactory.CreateLogger< StorageAccountProvider>();
             this.configuration = configuration;
             this.configurationValues = new Configuration();
         }
@@ -34,8 +38,12 @@ namespace StorageContentPlatform.ContentCreator.Services
             var result = true;
             LoadConfig();
 
-            BlobContainerClient container = new BlobContainerClient(this.configurationValues.StorageConnectionString, this.configurationValues.StorageContainerName);
+            BlobContainerClient container = new BlobContainerClient(
+                this.configurationValues.StorageConnectionString, 
+                this.configurationValues.StorageContainerName);
+
             await container.CreateIfNotExistsAsync();
+
             try
             {
                 BlobClient blob = container.GetBlobClient(contentName);
@@ -44,10 +52,12 @@ namespace StorageContentPlatform.ContentCreator.Services
                 if (metadata != null && metadata.Any())
                     await blob.SetMetadataAsync(metadata);
             }
-            catch
+            catch (Exception ex)
             {
+                this.logger.LogError(ex, "Error saving content {ContentName}", contentName);
                 result = false;
             }
+
             return result;
         }
 
