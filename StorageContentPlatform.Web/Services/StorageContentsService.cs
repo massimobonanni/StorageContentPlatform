@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.Options;
 using StorageContentPlatform.Web.Entities;
 using StorageContentPlatform.Web.Interfaces;
 using System.Net;
@@ -38,17 +39,19 @@ namespace StorageContentPlatform.Web.Services
             var result = new List<ContainerInfo>();
             LoadConfig();
 
-            var blobServiceClient = CreateBlobServiceClient();
+            var blobServiceClient = new BlobServiceClient(
+                this.configurationValues.StorageConnectionString,
+                GetClientOptions());
 
             var resultSegment = blobServiceClient
-                    .GetBlobContainersAsync(BlobContainerTraits.Metadata, null,cancellationToken)
+                    .GetBlobContainersAsync(BlobContainerTraits.Metadata, null, cancellationToken)
                     .AsPages(default, 100);
 
             await foreach (Azure.Page<BlobContainerItem> containerPage in resultSegment)
             {
                 foreach (BlobContainerItem containerItem in containerPage.Values)
                 {
-                    if (containerItem.HasMetadataValues("containerType",this.configurationValues.ContainerTypes))
+                    if (containerItem.HasMetadataValues("containerType", this.configurationValues.ContainerTypes))
                     {
                         var containerInfo = new ContainerInfo();
                         containerInfo.Name = containerItem.Name;
@@ -69,9 +72,10 @@ namespace StorageContentPlatform.Web.Services
             var result = new List<Entities.BlobInfo>();
             LoadConfig();
 
-            var blobServiceClient = CreateBlobServiceClient();
-
-            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            var containerClient = new BlobContainerClient(
+                this.configurationValues.StorageConnectionString,
+                containerName,
+                GetClientOptions());
 
             var blobPrefix = date.ToString("yyyyMMdd");
 
@@ -99,24 +103,24 @@ namespace StorageContentPlatform.Web.Services
             return result.OrderByDescending(b => b.LastModified);
         }
 
-        public async Task<BlobContent> GetBlobAsync(string containerName, string blobName,CancellationToken cancellationToken)
+        public async Task<BlobContent> GetBlobAsync(string containerName, string blobName, CancellationToken cancellationToken)
         {
             var result = new BlobContent();
             result.Name = blobName;
             LoadConfig();
-            
-            var blobServiceClient = CreateBlobServiceClient();
 
-            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-
-            var blobClient = containerClient.GetBlobClient(blobName);
+            var blobClient = new BlobClient(
+                this.configurationValues.StorageConnectionString,
+                containerName,
+                blobName,
+                GetClientOptions());
 
             var blobContent = await blobClient.DownloadContentAsync(cancellationToken);
 
             if (blobContent.HasValue)
                 result.Content = blobContent.Value.Content.ToString();
 
-            var properties = await blobClient.GetPropertiesAsync(null, cancellationToken) ;
+            var properties = await blobClient.GetPropertiesAsync(null, cancellationToken);
 
             if (properties.HasValue)
                 result.Metadata = properties.Value.Metadata;
@@ -124,30 +128,23 @@ namespace StorageContentPlatform.Web.Services
             return result;
         }
 
-        private BlobServiceClient CreateBlobServiceClient()
+        private BlobClientOptions GetClientOptions()
         {
-            // For more info about BlobClientOptions look at https://learn.microsoft.com/en-us/dotnet/api/azure.storage.blobs.blobclientoptions?view=azure-dotnet
-            BlobClientOptions options = new()
-            {
-                Retry =
-                {
-                        Delay = TimeSpan.FromSeconds(2),
-                        MaxRetries = 5,
-                        Mode = RetryMode.Exponential,
-                        MaxDelay = TimeSpan.FromSeconds(10)
-                },
-                GeoRedundantSecondaryUri = new Uri(GetSecondaryUrl())
-            };
-
-            var blobServiceClient = new BlobServiceClient(this.configurationValues.StorageConnectionString, options);
-            return blobServiceClient;
+            var options = new BlobClientOptions();
+            options.Retry.Delay = TimeSpan.FromSeconds(2);
+            options.Retry.MaxRetries = 5;
+            options.Retry.Mode = RetryMode.Exponential;
+            options.Retry.MaxDelay = TimeSpan.FromSeconds(10);
+            options.GeoRedundantSecondaryUri = new Uri(GetSecondaryUrl());
+            return options;
         }
+
 
         private string GetSecondaryUrl()
         {
             string secondaryUrl = null;
             var segments = this.configurationValues.StorageConnectionString.Split(";");
-            var accountNameSegment = segments.Where(s=>s.ToLower().StartsWith("accountname")).FirstOrDefault();
+            var accountNameSegment = segments.Where(s => s.ToLower().StartsWith("accountname")).FirstOrDefault();
             if (!string.IsNullOrWhiteSpace(accountNameSegment))
             {
                 var accountName = accountNameSegment.Split("=")[1];
