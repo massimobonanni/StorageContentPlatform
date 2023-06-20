@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using StorageContentPlatform.ContentCreator.Interfaces;
-using StorageContentPlatform.ContentCreator.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using Utilities = StorageContentPlatform.ContentCreator.Utilities;
 
 namespace StorageContentPlatform.ContentCreator.Services
 {
@@ -38,27 +38,18 @@ namespace StorageContentPlatform.ContentCreator.Services
             var result = true;
             LoadConfig();
 
-            var strBuild = new StringBuilder();
-            var cumulativeSize = 0;
-            while (cumulativeSize / 1024.0 < this.configurationValues.ContentsSizeForGenerationInKb)
+            var cumulativeSize = 0.0;
+            while (cumulativeSize  < this.configurationValues.ContentsSizeForGenerationInKb)
             {
-                var size = 0;
-                while (size / 1024.0 < this.configurationValues.BlobMinimumSizeInKb)
-                {
-                    var sentence = Faker.Lorem.Sentence(Faker.RandomNumber.Next(1, 1000));
-                    size += System.Text.ASCIIEncoding.UTF8.GetByteCount(sentence);
-                    strBuild.AppendLine(sentence);
-                }
-
                 var contentId= Guid.NewGuid();
                 var contentName = @$"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{contentId}.txt";
-                var metadata= MetadataGenerator.GenerateMetadata(contentId);
+                var content = Utilities.ContentGenerator.GenerateRandomContent(this.configurationValues.BlobMinimumSizeInKb, out var size);
+                var metadata= Utilities.MetadataGenerator.GenerateMetadata(contentId);
 
-                this.logger.LogInformation("Saving content {ContentName} with size {Size} bytes", contentName, size);
-                await persistanceProvider.SaveContentAsync(contentName, strBuild.ToString(),metadata);
-                this.logger.LogInformation("Saved content {ContentName} with size {Size} bytes", contentName, size);
+                this.logger.LogInformation("Saving content {ContentName} with size {Size} Kb", contentName, size);
+                await persistanceProvider.SaveContentAsync(contentName, content,metadata);
+                this.logger.LogInformation("Saved content {ContentName} with size {Size} Kb", contentName, size);
 
-                strBuild.Clear();
                 cumulativeSize += size;
             }
 
