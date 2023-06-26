@@ -9,11 +9,13 @@ namespace StorageContentPlatform.ContentCreator.Utilities
 {
     public static class ContentGenerator
     {
-        public static string GenerateRandomContent(int minimumSizeInKb, out double actualSize)
+        public static string GenerateRandomContent(int minimumSizeInKb, int maximumSizeInKb, out double actualSize)
         {
             var strBuild = new StringBuilder();
             var size = 0;
-            while (size / 1024.0 < minimumSizeInKb)
+            var randomSize = Faker.RandomNumber.Next(minimumSizeInKb, maximumSizeInKb);
+
+            while (size / 1024.0 < randomSize)
             {
                 var sentence = Faker.Lorem.Sentence(Faker.RandomNumber.Next(1, 1000));
                 size += System.Text.ASCIIEncoding.UTF8.GetByteCount(sentence);

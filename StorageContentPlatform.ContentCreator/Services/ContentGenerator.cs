@@ -16,6 +16,7 @@ namespace StorageContentPlatform.ContentCreator.Services
         private class Configuration
         {
             public int BlobMinimumSizeInKb { get; set; }
+            public int BlobMaximumSizeInKb { get; set; }
             public int ContentsSizeForGenerationInKb { get; set; }
         }
 
@@ -39,15 +40,18 @@ namespace StorageContentPlatform.ContentCreator.Services
             LoadConfig();
 
             var cumulativeSize = 0.0;
-            while (cumulativeSize  < this.configurationValues.ContentsSizeForGenerationInKb)
+            while (cumulativeSize < this.configurationValues.ContentsSizeForGenerationInKb)
             {
-                var contentId= Guid.NewGuid();
+                var contentId = Guid.NewGuid();
                 var contentName = @$"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{contentId}.txt";
-                var content = Utilities.ContentGenerator.GenerateRandomContent(this.configurationValues.BlobMinimumSizeInKb, out var size);
-                var metadata= Utilities.MetadataGenerator.GenerateMetadata(contentId);
+                var content = Utilities.ContentGenerator.GenerateRandomContent(
+                    this.configurationValues.BlobMinimumSizeInKb, 
+                    this.configurationValues.BlobMaximumSizeInKb,
+                    out var size);
+                var metadata = Utilities.MetadataGenerator.GenerateMetadata(contentId);
 
                 this.logger.LogInformation("Saving content {ContentName} with size {Size} Kb", contentName, size);
-                await persistanceProvider.SaveContentAsync(contentName, content,metadata);
+                await persistanceProvider.SaveContentAsync(contentName, content, metadata);
                 this.logger.LogInformation("Saved content {ContentName} with size {Size} Kb", contentName, size);
 
                 cumulativeSize += size;
@@ -60,6 +64,7 @@ namespace StorageContentPlatform.ContentCreator.Services
         {
             this.logger.LogInformation("Loading configuration");
             this.configurationValues.BlobMinimumSizeInKb = this.configuration.GetValue<int>("BlobMinimumSizeInKb");
+            this.configurationValues.BlobMaximumSizeInKb = this.configuration.GetValue<int>("BlobMaximumSizeInKb");
             this.configurationValues.ContentsSizeForGenerationInKb = this.configuration.GetValue<int>("ContentsSizeForGenerationInKb");
         }
     }
