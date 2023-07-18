@@ -12,7 +12,7 @@ The solution implements these requirements:
 * the platform needs daily statistics on the number of contents available, and on the space occupied;
 
 ## Architecture
-The following image describe the solution architecture:
+The following image describes the solution architecture:
 
 ![The solution architecture](Documentation/Images/Architecture.png)
 
