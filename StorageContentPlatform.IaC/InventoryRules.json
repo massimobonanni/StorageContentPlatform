@@ -1,0 +1,72 @@
+// Inventory rule for storage scpeusdatastorage e container eusdocuments
+{
+    "id": "/subscriptions/02e4a7f0-e0bc-4ae8-8fa8-73f1686fb788/resourceGroups/StorageContentPlatform-rg/providers/Microsoft.Storage/storageAccounts/scpeusdatastorage/inventoryPolicies/default",
+    "name": "DefaultInventoryPolicy",
+    "type": "Microsoft.Storage/storageAccounts/inventoryPolicies",
+    "properties": {
+        "lastModifiedTime": "2023-03-29T06:44:16.4944524Z",
+        "policy": {
+            "enabled": true,
+            "type": "Inventory",
+            "rules": [
+                {
+                    "destination": "inventory",
+                    "enabled": true,
+                    "name": "LocalDocumentsInventoryRule",
+                    "definition": {
+                        "format": "Csv",
+                        "schedule": "Daily",
+                        "objectType": "Blob",
+                        "schemaFields": [
+                            "Name",
+                            "Creation-Time",
+                            "Last-Modified",
+                            "ETag",
+                            "Content-Length",
+                            "Content-Type",
+                            "Content-Encoding",
+                            "Content-Language",
+                            "Content-CRC64",
+                            "Content-MD5",
+                            "Cache-Control",
+                            "Content-Disposition",
+                            "BlobType",
+                            "AccessTier",
+                            "AccessTierChangeTime",
+                            "AccessTierInferred",
+                            "Metadata",
+                            "LastAccessTime",
+                            "LeaseStatus",
+                            "LeaseState",
+                            "LeaseDuration",
+                            "ServerEncrypted",
+                            "CustomerProvidedKeySha256",
+                            "RehydratePriority",
+                            "ArchiveStatus",
+                            "EncryptionScope",
+                            "CopyId",
+                            "CopyStatus",
+                            "CopySource",
+                            "CopyProgress",
+                            "CopyCompletionTime",
+                            "CopyStatusDescription",
+                            "ImmutabilityPolicyUntilDate",
+                            "ImmutabilityPolicyMode",
+                            "LegalHold",
+                            "Tags",
+                            "TagCount"
+                        ],
+                        "filters": {
+                            "blobTypes": [
+                                "blockBlob"
+                            ],
+                            "prefixMatch": [
+                                "eusdocuments/"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,45 @@
+// object replication rules for storage scpneudatastorage-->scpeusdatastorage 
+
+{
+    "id": "/subscriptions/02e4a7f0-e0bc-4ae8-8fa8-73f1686fb788/resourceGroups/StorageContentPlatform-rg/providers/Microsoft.Storage/storageAccounts/scpneudatastorage/objectReplicationPolicies/7f917681-5360-4013-a1c3-608ba77e8120",
+    "name": "7f917681-5360-4013-a1c3-608ba77e8120",
+    "type": "Microsoft.Storage/storageAccounts/objectReplicationPolicies",
+    "properties": {
+      "policyId": "7f917681-5360-4013-a1c3-608ba77e8120",
+      "sourceAccount": "/subscriptions/02e4a7f0-e0bc-4ae8-8fa8-73f1686fb788/resourcegroups/StorageContentPlatform-rg/providers/Microsoft.Storage/storageAccounts/scpneudatastorage",
+      "destinationAccount": "/subscriptions/02e4a7f0-e0bc-4ae8-8fa8-73f1686fb788/resourceGroups/StorageContentPlatform-rg/providers/Microsoft.Storage/storageAccounts/scpeusdatastorage",
+      "rules": [
+        {
+          "ruleId": "c3777394-3855-4a99-82c7-95723eba919c",
+          "sourceContainer": "neudocuments",
+          "destinationContainer": "neudocuments",
+          "filters": {
+            "minCreationTime": "1601-01-01T00:00:00Z"
+          }
+        }
+      ]
+    }
+  }
+
+// object replication rules for storage scpeusdatastorage-->scpneudatastorage 
+
+{
+  "id": "/subscriptions/02e4a7f0-e0bc-4ae8-8fa8-73f1686fb788/resourceGroups/StorageContentPlatform-rg/providers/Microsoft.Storage/storageAccounts/scpeusdatastorage/objectReplicationPolicies/7f917681-5360-4013-a1c3-608ba77e8120",
+  "name": "7f917681-5360-4013-a1c3-608ba77e8120",
+  "type": "Microsoft.Storage/storageAccounts/objectReplicationPolicies",
+  "properties": {
+    "policyId": "7f917681-5360-4013-a1c3-608ba77e8120",
+    "sourceAccount": "/subscriptions/02e4a7f0-e0bc-4ae8-8fa8-73f1686fb788/resourcegroups/StorageContentPlatform-rg/providers/Microsoft.Storage/storageAccounts/scpuesdatastorage",
+    "destinationAccount": "/subscriptions/02e4a7f0-e0bc-4ae8-8fa8-73f1686fb788/resourceGroups/StorageContentPlatform-rg/providers/Microsoft.Storage/storageAccounts/scpneudatastorage",
+    "rules": [
+      {
+        "ruleId": "c3777394-3855-4a99-82c7-95723eba919c",
+        "sourceContainer": "eusdocuments",
+        "destinationContainer": "eusdocuments",
+        "filters": {
+          "minCreationTime": "1601-01-01T00:00:00Z"
+        }
+      }
+    ]
+  }
+}

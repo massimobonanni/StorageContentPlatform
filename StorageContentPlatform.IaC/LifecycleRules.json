@@ -1,0 +1,87 @@
+// Lifecycle rules for scpeusdatastorage storage
+{
+    "rules": [
+      {
+        "enabled": true,
+        "name": "InventoryRule",
+        "type": "Lifecycle",
+        "definition": {
+          "actions": {
+            "baseBlob": {
+              "delete": {
+                "daysAfterCreationGreaterThan": 30
+              }
+            }
+          },
+          "filters": {
+            "blobTypes": [
+              "blockBlob"
+            ],
+            "prefixMatch": [
+              "inventory/"
+            ]
+          }
+        }
+      },
+      {
+        "enabled": true,
+        "name": "LocalDocumentsLifecycleRule",
+        "type": "Lifecycle",
+        "definition": {
+          "actions": {
+            "version": {
+              "delete": {
+                "daysAfterCreationGreaterThan": 1
+              }
+            },
+            "baseBlob": {
+              "tierToCool": {
+                "daysAfterCreationGreaterThan": 10
+              },
+              "tierToArchive": {
+                "daysAfterCreationGreaterThan": 30
+              },
+              "delete": {
+                "daysAfterCreationGreaterThan": 365
+              }
+            }
+          },
+          "filters": {
+            "blobTypes": [
+              "blockBlob"
+            ],
+            "prefixMatch": [
+              "eusdocuments/"
+            ]
+          }
+        }
+      },
+      {
+        "enabled": true,
+        "name": "RemoteDocumentsLifecycleRule",
+        "type": "Lifecycle",
+        "definition": {
+          "actions": {
+            "version": {
+              "delete": {
+                "daysAfterCreationGreaterThan": 10
+              }
+            },
+            "baseBlob": {
+              "tierToArchive": {
+                "daysAfterCreationGreaterThan": 30
+              }
+            }
+          },
+          "filters": {
+            "blobTypes": [
+              "blockBlob"
+            ],
+            "prefixMatch": [
+              "neudocuments/"
+            ]
+          }
+        }
+      }
+    ]
+  }

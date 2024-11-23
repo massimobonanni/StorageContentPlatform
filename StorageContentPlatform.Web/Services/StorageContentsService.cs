@@ -114,7 +114,7 @@ namespace StorageContentPlatform.Web.Services
                 containerName,
                 blobName,
                 GetClientOptions());
-
+            
             var blobContent = await blobClient.DownloadContentAsync(cancellationToken);
 
             if (blobContent.HasValue)
