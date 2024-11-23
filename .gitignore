@@ -351,3 +351,17 @@ MigrationBackup/
 /StorageContentPlatform.Web/Properties/ServiceDependencies/euscontentwebsite - Web Deploy
 /StorageContentPlatform.ContentCreator/Properties/ServiceDependencies/scpeuscontentgenerator - Zip Deploy
 /StorageContentPlatform.ManagementFunctions/Properties/ServiceDependencies/scpeusmanagement - Zip Deploy
+/StorageContentPlatform.Web/Properties/ServiceDependencies/scpweu-fe - Zip Deploy/profile.arm.json
+/StorageContentPlatform.Web/Properties/ServiceDependencies/scpwus-fe - Zip Deploy/profile.arm.json
+/StorageContentPlatform.ManagementFunctions/Properties/ServiceDependencies/scpweu-mngm-func - Zip Deploy/appInsights1.arm.json
+/StorageContentPlatform.ManagementFunctions/Properties/ServiceDependencies/scpweu-mngm-func - Zip Deploy/profile.arm.json
+/StorageContentPlatform.ManagementFunctions/Properties/ServiceDependencies/scpweu-mngm-func - Zip Deploy/storage1.arm.json
+/StorageContentPlatform.ManagementFunctions/Properties/ServiceDependencies/scpwus-mngm-func - Zip Deploy/appInsights1.arm.json
+/StorageContentPlatform.ManagementFunctions/Properties/ServiceDependencies/scpwus-mngm-func - Zip Deploy/storage1.arm.json
+/StorageContentPlatform.ManagementFunctions/Properties/serviceDependencies.scpweu-mngm-func - Zip Deploy.json
+/StorageContentPlatform.ManagementFunctions/Properties/serviceDependencies.scpwus-mngm-func - Zip Deploy.json
+/StorageContentPlatform.ContentCreator/Properties/ServiceDependencies/scpweu-contgen-func - Zip Deploy/appInsights1.arm.json
+/StorageContentPlatform.ContentCreator/Properties/ServiceDependencies/scpweu-contgen-func - Zip Deploy/profile.arm.json
+/StorageContentPlatform.ContentCreator/Properties/ServiceDependencies/scpweu-contgen-func - Zip Deploy/storage1.arm.json
+/StorageContentPlatform.ContentCreator/Properties/ServiceDependencies/scpwus-contgen-func - Zip Deploy/appInsights1.arm.json
+/StorageContentPlatform.ContentCreator/Properties/ServiceDependencies/scpwus-contgen-func - Zip Deploy/storage1.arm.json
