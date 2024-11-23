@@ -1,4 +1,4 @@
-name: Content Generator component
+name: Content Generator Component
 
 on:
   workflow_dispatch:
