@@ -35,7 +35,8 @@ namespace StorageContentPlatform.Web.Controllers
             var model = new DetailViewModel();
             model.Date = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
             var statistics = await this._statisticsService.GetStatisticsAsync(model.Date, model.Date);
-            model.StatisticData = statistics.FirstOrDefault();
+            if (statistics != null)
+                model.StatisticData = statistics.FirstOrDefault();
             return View(model);
         }
 

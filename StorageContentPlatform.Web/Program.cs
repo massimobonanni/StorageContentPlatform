@@ -8,18 +8,13 @@ namespace StorageContentPlatform.Web
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
-            {
-                config.AddJsonFile(
-                     "appsettings.json", optional: false, reloadOnChange: true);
-                config.AddJsonFile(
-                    "appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-                config.AddJsonFile(
-                    "appsettings.local.json", optional: true, reloadOnChange: true);
-                config.AddJsonFile(
-                    "appsettings.local.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-            });
-            
+
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.local.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
             // Add services to the container.
             builder.Services.AddScoped<IContentsService, StorageContentsService>();
             builder.Services.AddScoped<IStatisticsService, StorageStatisticsService>();

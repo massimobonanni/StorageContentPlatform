@@ -6,6 +6,6 @@ namespace StorageContentPlatform.Web.Models.StatisticsController
     {
         public DateTime Date { get; set; }
         
-        public StatisticData StatisticData { get; set; }
+        public StatisticData? StatisticData { get; set; }
     }
 }

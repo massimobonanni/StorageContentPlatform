@@ -7,6 +7,6 @@ namespace StorageContentPlatform.Web.Models.StatisticsController
         public DateTime ToFilter { get; set; }
         public DateTime FromFilter { get; set; }
         
-        public IEnumerable<StatisticData> Statistics { get; set; }
+        public IEnumerable<StatisticData>? Statistics { get; set; }
     }
 }

@@ -28,12 +28,12 @@ namespace StorageContentPlatform.Web.Entities
         public DateTimeOffset? Timestamp { get; set ; }
 
     
-        public IDictionary<string, Metadata> MetadataList { get; set; }
+        public IDictionary<string, Metadata>? MetadataList { get; set; }
     }
 
     public class Metadata
     {
-        public string Label { get; set; }
+        public string? Label { get; set; }
 
         public IDictionary<string, long> Counters { get; set; } = new Dictionary<string, long>();
     }

@@ -10,9 +10,9 @@ namespace StorageContentPlatform.Web.Services
     {
         private class Configuration
         {
-            public string StorageConnectionString { get; set; }
-            public string StorageAccountName { get; set; }
-            public string StatisticTableName { get; set; }
+            public string? StorageConnectionString { get; set; }
+            public string? StorageAccountName { get; set; }
+            public string? StatisticTableName { get; set; }
         }
 
         private readonly IConfiguration configuration;
@@ -62,7 +62,7 @@ namespace StorageContentPlatform.Web.Services
 
         private TableServiceClient CreateTebleClient()
         {
-            TableServiceClient tableClient = null;
+            TableServiceClient? tableClient = null;
             if (!string.IsNullOrWhiteSpace(this.configurationValues.StorageConnectionString))
             {
                 tableClient = new TableServiceClient(

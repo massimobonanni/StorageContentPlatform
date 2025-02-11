@@ -26,7 +26,7 @@ namespace StorageContentPlatform.Web.Controllers
         }
 
         // GET: ContentController/Container?containerName=<container name>&date=20230210
-        public async Task<ActionResult> Container(string containerName,string date=null)
+        public async Task<ActionResult> Container(string containerName,string? date=null)
         {
             var model = new ContainerViewModel();
             model.ContainerName = containerName;

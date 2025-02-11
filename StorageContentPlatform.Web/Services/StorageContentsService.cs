@@ -11,9 +11,9 @@ namespace StorageContentPlatform.Web.Services
     {
         private class Configuration
         {
-            public string StorageConnectionString { get; set; }
-            public string StorageAccountName { get; set; }
-            public IEnumerable<string> ContainerTypes { get; set; }
+            public string? StorageConnectionString { get; set; }
+            public string? StorageAccountName { get; set; }
+            public IEnumerable<string>? ContainerTypes { get; set; }
         }
 
         private readonly IConfiguration configuration;
@@ -118,14 +118,14 @@ namespace StorageContentPlatform.Web.Services
         {
             this.configurationValues.StorageConnectionString = this.configuration.GetValue<string>("StorageConnectionString");
             this.configurationValues.StorageAccountName = this.configuration.GetValue<string>("StorageAccountName");
-            this.configurationValues.ContainerTypes = this.configuration.GetValue<string>("ContainerTypes")
+            this.configurationValues.ContainerTypes = this.configuration.GetValue<string>("ContainerTypes")?
                     .ToLower()
                     .Split("|", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
         }
 
         private BlobServiceClient CreateBlobServiceClient()
         {
-            BlobServiceClient blobServiceClient = null;
+            BlobServiceClient? blobServiceClient = null;
 
             if (!string.IsNullOrWhiteSpace(this.configurationValues.StorageConnectionString))
             {
@@ -146,7 +146,7 @@ namespace StorageContentPlatform.Web.Services
 
         private BlobContainerClient CreateBlobContainerClient(string containerName)
         {
-            BlobContainerClient blobContainerClient = null;
+            BlobContainerClient? blobContainerClient = null;
             if (!string.IsNullOrWhiteSpace(this.configurationValues.StorageConnectionString))
             {
                 blobContainerClient = new BlobContainerClient(
@@ -166,7 +166,7 @@ namespace StorageContentPlatform.Web.Services
 
         private BlobClient CreateBlobClient(string containerName, string blobName)
         {
-            BlobClient blobClient = null;
+            BlobClient? blobClient = null;
 
             if (!string.IsNullOrWhiteSpace(this.configurationValues.StorageConnectionString))
             {
@@ -194,19 +194,30 @@ namespace StorageContentPlatform.Web.Services
             options.Retry.MaxRetries = 5;
             options.Retry.Mode = RetryMode.Exponential;
             options.Retry.MaxDelay = TimeSpan.FromSeconds(10);
-            options.GeoRedundantSecondaryUri = new Uri(GetSecondaryUrl());
+            var secondaryUrl = GetSecondaryUrl();
+            if (!string.IsNullOrWhiteSpace(secondaryUrl))
+            {
+              options.GeoRedundantSecondaryUri = new Uri(secondaryUrl);  
+            }
             return options;
         }
 
-        private string GetSecondaryUrl()
+        private string? GetSecondaryUrl()
         {
-            string secondaryUrl = null;
-            var segments = this.configurationValues.StorageConnectionString.Split(";");
-            var accountNameSegment = segments.Where(s => s.ToLower().StartsWith("accountname")).FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(accountNameSegment))
+            string? secondaryUrl = null;
+            if (!string.IsNullOrWhiteSpace(configurationValues.StorageConnectionString))
             {
-                var accountName = accountNameSegment.Split("=")[1];
-                secondaryUrl = $"https://{accountName}-secondary.blob.core.windows.net";
+                var segments = configurationValues.StorageConnectionString.Split(";");
+                var accountNameSegment = segments.Where(s => s.ToLower().StartsWith("accountname")).FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(accountNameSegment))
+                {
+                    var accountName = accountNameSegment.Split("=")[1];
+                    secondaryUrl = $"https://{accountName}-secondary.blob.core.windows.net";
+                }
+            }
+            else
+            {
+                secondaryUrl = $"https://{configurationValues.StorageAccountName}-secondary.blob.core.windows.net";
             }
             return secondaryUrl;
         }
