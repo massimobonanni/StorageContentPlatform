@@ -50,7 +50,7 @@ jobs:
         zip -r ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} .
         
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: build_artifacts
         path: ${{ env.BUILD_OUTPUT_PATH }}
@@ -61,13 +61,13 @@ jobs:
     needs: build
     steps:
     - name: Download a Build Artifact
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4.1.8
       with:
         name: build_artifacts
         path: ${{ env.BUILD_OUTPUT_PATH }}
 
     - name: Deploy ${{ env.REGION1_FUNCTION_APP_NAME }}
-      uses: Azure/functions-action@v1.4.7
+      uses: Azure/functions-action@v1.4.8
       with:
         app-name: ${{ env.REGION1_FUNCTION_APP_NAME }}
         package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
@@ -78,13 +78,13 @@ jobs:
     needs: build
     steps:
     - name: Download a Build Artifact
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4.1.8
       with:
         name: build_artifacts
         path: ${{ env.BUILD_OUTPUT_PATH }}
 
     - name: Deploy ${{ env.REGION2_FUNCTION_APP_NAME }}
-      uses: Azure/functions-action@v1.4.7
+      uses: Azure/functions-action@v1.4.8
       with:
         app-name: ${{ env.REGION2_FUNCTION_APP_NAME }}
         package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
