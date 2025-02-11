@@ -1,10 +1,9 @@
 ﻿using Azure.Core;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.Extensions.Options;
 using StorageContentPlatform.Web.Entities;
 using StorageContentPlatform.Web.Interfaces;
-using System.Net;
 
 namespace StorageContentPlatform.Web.Services
 {
@@ -13,7 +12,7 @@ namespace StorageContentPlatform.Web.Services
         private class Configuration
         {
             public string StorageConnectionString { get; set; }
-
+            public string StorageAccountName { get; set; }
             public IEnumerable<string> ContainerTypes { get; set; }
         }
 
@@ -26,22 +25,13 @@ namespace StorageContentPlatform.Web.Services
             this.configurationValues = new Configuration();
         }
 
-        private void LoadConfig()
-        {
-            this.configurationValues.StorageConnectionString = this.configuration.GetValue<string>("StorageConnectionString");
-            this.configurationValues.ContainerTypes = this.configuration.GetValue<string>("ContainerTypes")
-                    .ToLower()
-                    .Split("|", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
-        }
 
+        #region [ Public Methods - IContentsService implementation ]
         public async Task<IEnumerable<ContainerInfo>> GetContainersAsync(CancellationToken cancellationToken = default)
         {
             var result = new List<ContainerInfo>();
             LoadConfig();
-
-            var blobServiceClient = new BlobServiceClient(
-                this.configurationValues.StorageConnectionString,
-                GetClientOptions());
+            BlobServiceClient blobServiceClient = CreateBlobServiceClient();
 
             var resultSegment = blobServiceClient
                     .GetBlobContainersAsync(BlobContainerTraits.Metadata, null, cancellationToken)
@@ -72,10 +62,7 @@ namespace StorageContentPlatform.Web.Services
             var result = new List<Entities.BlobInfo>();
             LoadConfig();
 
-            var containerClient = new BlobContainerClient(
-                this.configurationValues.StorageConnectionString,
-                containerName,
-                GetClientOptions());
+            BlobContainerClient containerClient = CreateBlobContainerClient(containerName);
 
             var blobPrefix = date.ToString("yyyyMMdd");
 
@@ -109,12 +96,8 @@ namespace StorageContentPlatform.Web.Services
             result.Name = blobName;
             LoadConfig();
 
-            var blobClient = new BlobClient(
-                this.configurationValues.StorageConnectionString,
-                containerName,
-                blobName,
-                GetClientOptions());
-            
+            BlobClient blobClient = CreateBlobClient(containerName, blobName);
+
             var blobContent = await blobClient.DownloadContentAsync(cancellationToken);
 
             if (blobContent.HasValue)
@@ -128,6 +111,82 @@ namespace StorageContentPlatform.Web.Services
             return result;
         }
 
+        #endregion [ Public Methods - IContentsService implementation ]
+
+        #region [ Private Methods ]
+        private void LoadConfig()
+        {
+            this.configurationValues.StorageConnectionString = this.configuration.GetValue<string>("StorageConnectionString");
+            this.configurationValues.StorageAccountName = this.configuration.GetValue<string>("StorageAccountName");
+            this.configurationValues.ContainerTypes = this.configuration.GetValue<string>("ContainerTypes")
+                    .ToLower()
+                    .Split("|", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
+        }
+
+        private BlobServiceClient CreateBlobServiceClient()
+        {
+            BlobServiceClient blobServiceClient = null;
+
+            if (!string.IsNullOrWhiteSpace(this.configurationValues.StorageConnectionString))
+            {
+                blobServiceClient = new BlobServiceClient(
+                    this.configurationValues.StorageConnectionString,
+                    GetClientOptions());
+            }
+            else
+            {
+                blobServiceClient = new BlobServiceClient(
+                    new Uri($"https://{this.configurationValues.StorageAccountName}.blob.core.windows.net"),
+                    new DefaultAzureCredential(),
+                    GetClientOptions());
+            }
+
+            return blobServiceClient;
+        }
+
+        private BlobContainerClient CreateBlobContainerClient(string containerName)
+        {
+            BlobContainerClient blobContainerClient = null;
+            if (!string.IsNullOrWhiteSpace(this.configurationValues.StorageConnectionString))
+            {
+                blobContainerClient = new BlobContainerClient(
+                    this.configurationValues.StorageConnectionString,
+                    containerName,
+                    GetClientOptions());
+            }
+            else
+            {
+                blobContainerClient = new BlobContainerClient(
+                    new Uri($"https://{this.configurationValues.StorageAccountName}.blob.core.windows.net/{containerName}"),
+                    new DefaultAzureCredential(),
+                    GetClientOptions());
+            }
+            return blobContainerClient;
+        }
+
+        private BlobClient CreateBlobClient(string containerName, string blobName)
+        {
+            BlobClient blobClient = null;
+
+            if (!string.IsNullOrWhiteSpace(this.configurationValues.StorageConnectionString))
+            {
+                blobClient = new BlobClient(
+                    this.configurationValues.StorageConnectionString,
+                    containerName,
+                    blobName,
+                    GetClientOptions());
+            }
+            else
+            {
+                blobClient = new BlobClient(
+                    new Uri($"https://{this.configurationValues.StorageAccountName}.blob.core.windows.net/{containerName}/{blobName}"),
+                    new DefaultAzureCredential(),
+                    GetClientOptions());
+            }
+
+            return blobClient;
+        }
+
         private BlobClientOptions GetClientOptions()
         {
             var options = new BlobClientOptions();
@@ -138,7 +197,6 @@ namespace StorageContentPlatform.Web.Services
             options.GeoRedundantSecondaryUri = new Uri(GetSecondaryUrl());
             return options;
         }
-
 
         private string GetSecondaryUrl()
         {
@@ -152,5 +210,7 @@ namespace StorageContentPlatform.Web.Services
             }
             return secondaryUrl;
         }
+
+        #endregion [ Private Methods ]
     }
 }
