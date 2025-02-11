@@ -14,8 +14,8 @@ on:
       - "StorageContentPlatform.Web/**"
 
 env: 
-  REGION1_APP_NAME: "neucontentwebsite"
-  REGION2_APP_NAME: "euscontentwebsite"
+  REGION1_APP_NAME: "scpweu-fe"
+  REGION2_APP_NAME: "scpwus-fe"
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/StorageContentPlatform.Web'
   BUILD_OUTPUT_PATH: '${{ github.workspace }}/build-artifacts'
   BUILD_PACKAGE_NAME: 'frontend.zip'

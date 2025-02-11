@@ -14,8 +14,8 @@ on:
       - "StorageContentPlatform.ManagementFunctions/**"
 
 env: 
-  REGION1_FUNCTION_APP_NAME: "scpneumanagement"
-  REGION2_FUNCTION_APP_NAME: "scpeusmanagement"
+  REGION1_FUNCTION_APP_NAME: "scpweu-mngm-func"
+  REGION2_FUNCTION_APP_NAME: "scpweu-mngm-func"
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/StorageContentPlatform.ManagementFunctions'
   BUILD_OUTPUT_PATH: '${{ github.workspace }}/build-artifacts'
   BUILD_PACKAGE_NAME: 'managementfunctions.zip'

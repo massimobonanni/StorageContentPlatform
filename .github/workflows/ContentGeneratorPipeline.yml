@@ -14,8 +14,8 @@ on:
       - "StorageContentPlatform.ContentCreator/**"
 
 env: 
-  REGION1_FUNCTION_APP_NAME: "scpneucontentgenerator"
-  REGION2_FUNCTION_APP_NAME: "scpeuscontentgenerator"
+  REGION1_FUNCTION_APP_NAME: "scpweu-contgen-func"
+  REGION2_FUNCTION_APP_NAME: "scpwus-contgen-func"
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/StorageContentPlatform.ContentCreator'
   BUILD_OUTPUT_PATH: '${{ github.workspace }}/build-artifacts'
   BUILD_PACKAGE_NAME: 'contentcreator.zip'
