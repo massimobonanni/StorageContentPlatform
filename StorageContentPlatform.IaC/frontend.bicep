@@ -41,7 +41,7 @@ resource frontEndAppService 'Microsoft.Web/sites@2021-02-01' = {
     httpsOnly: true
     serverFarmId: frontEndAppServicePlan.id
     siteConfig: {
-      netFrameworkVersion: 'v6.0'
+      netFrameworkVersion: 'v8.0'
     }
   }
   identity: {
