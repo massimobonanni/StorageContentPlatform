@@ -1,8 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic.FileIO;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
 using StorageContentPlatform.ManagementFunctions.Entities;
 using StorageContentPlatform.ManagementFunctions.Interfaces;
 using System;
