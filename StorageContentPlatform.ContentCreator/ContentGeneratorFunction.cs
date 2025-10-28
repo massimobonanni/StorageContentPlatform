@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using StorageContentPlatform.ContentCreator.Interfaces;
@@ -12,19 +11,21 @@ namespace StorageContentPlatform.ContentCreator
     {
         private readonly IConfiguration configuration;
         private readonly IContentGenerator contentGenerator;
+        private readonly ILogger<ContentGeneratorFunction> logger;
         
         public ContentGeneratorFunction(IConfiguration configuration,
-            IContentGenerator contentGenerator)
+            IContentGenerator contentGenerator,
+            ILogger<ContentGeneratorFunction> logger)
         {
             this.configuration = configuration;
             this.contentGenerator = contentGenerator;
+            this.logger = logger;
         }
         
-        [FunctionName(nameof(ContentGeneratorFunction))]
-        public async Task Run([TimerTrigger("%ContentGeneratorTimer%")]TimerInfo myTimer, 
-            ILogger log)
+        [Function(nameof(ContentGeneratorFunction))]
+        public async Task Run([TimerTrigger("%ContentGeneratorTimer%")] TimerInfo myTimer)
         {
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
             await this.contentGenerator.GenerateContentsAsync();
         }
     }
