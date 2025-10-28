@@ -43,6 +43,12 @@ namespace StorageContentPlatform.ManagementFunctions
                 PropertyNameCaseInsensitive = true
             });
 
+            if (string.IsNullOrEmpty(data?.ManifestBlobUrl))
+            {
+                logger.LogError("ManifestBlobUrl is null or empty in event data");
+                return;
+            }
+
             logger.LogInformation($"Calling ReadInventoryManifestFile {data.ManifestBlobUrl}");
             var inventoryManifest = await this.persistanceService.ReadInventoryManifestFile(data.ManifestBlobUrl);
             logger.LogInformation($"Called ReadInventoryManifestFile {data.ManifestBlobUrl} started at {inventoryManifest?.InventoryStartTime}");
@@ -77,6 +83,12 @@ namespace StorageContentPlatform.ManagementFunctions
             {
                 PropertyNameCaseInsensitive = true
             });
+
+            if (string.IsNullOrEmpty(data?.url))
+            {
+                logger.LogError("Blob url is null or empty in event data");
+                return;
+            }
 
             var result= await this.persistentManagementService.UndeleteBlobAsync(data.url);
 
