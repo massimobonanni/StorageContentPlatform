@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
 using StorageContentPlatform.ContentCreator.Interfaces;
 using System;
 using System.Collections.Generic;
