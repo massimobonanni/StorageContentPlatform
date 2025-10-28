@@ -1,8 +1,7 @@
 ﻿using Azure.Storage.Blobs;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+using Azure.Data.Tables;
+using Azure;
 using Newtonsoft.Json;
 using StorageContentPlatform.ManagementFunctions.Entities;
 using StorageContentPlatform.ManagementFunctions.Interfaces;
@@ -25,16 +24,22 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             public string StatisticsTableName { get; set; }
         }
 
-        private class StatisticEntity : TableEntity
+        private class StatisticEntity : ITableEntity
         {
             internal const string StatisticsPartitionKey = "STATISTICS";
-            public StatisticEntity() : base()
+            
+            public string PartitionKey { get; set; }
+            public string RowKey { get; set; }
+            public DateTimeOffset? Timestamp { get; set; }
+            public ETag ETag { get; set; }
+
+            public StatisticEntity()
             {
                 this.RowKey = Guid.NewGuid().ToString();
                 this.PartitionKey = StatisticsPartitionKey;
             }
 
-            public StatisticEntity(InventoryStatistics statistics) : base()
+            public StatisticEntity(InventoryStatistics statistics)
             {
                 this.RowKey = Guid.NewGuid().ToString();
                 this.PartitionKey = StatisticsPartitionKey;
@@ -50,7 +55,9 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 this.ObjectInHotCount = statistics.ObjectInHotCount;
                 this.TotalObjectInArchiveSize = statistics.TotalObjectInArchiveSize;
                 this.ObjectInArchiveCount = statistics.ObjectInArchiveCount;
-                this.MetadataList = statistics.MetadataList;
+                this.MetadataListJson = statistics.MetadataList != null 
+                    ? JsonConvert.SerializeObject(statistics.MetadataList) 
+                    : null;
             }
 
             public DateTimeOffset InventoryCompletionTime { get; set; }
@@ -65,28 +72,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             public long TotalObjectInColdSize { get; set; }
             public long ObjectInArchiveCount { get; set; }
             public long TotalObjectInArchiveSize { get; set; }
-
-            [IgnoreProperty()]
-            public IDictionary<string, Metadata> MetadataList { get; set; }
-
-            public override IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
-            {
-                var x = base.WriteEntity(operationContext);
-                if (this.MetadataList != null)
-                    x[nameof(this.MetadataList)] = new EntityProperty(JsonConvert.SerializeObject(this.MetadataList));
-                else
-                    x[nameof(this.MetadataList)] = null;
-                return x;
-            }
-
-            public override void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
-            {
-                base.ReadEntity(properties, operationContext);
-                if (properties.ContainsKey(nameof(this.MetadataList)))
-                {
-                    this.MetadataList = JsonConvert.DeserializeObject<Dictionary<string, Metadata>>(properties[nameof(this.MetadataList)].StringValue);
-                }
-            }
+            public string MetadataListJson { get; set; }
         }
 
         private readonly IConfiguration configuration;
@@ -112,13 +98,11 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             var entity = new StatisticEntity(statistics);
             try
             {
-                var cloudStorageAccount = CloudStorageAccount.Parse(this.configurationValues.StatisticsStorageConnectionString);
-                var tableClient = cloudStorageAccount.CreateCloudTableClient();
-                var table = tableClient.GetTableReference(this.configurationValues.StatisticsTableName);
-
-                TableOperation operation = TableOperation.Insert(entity);
-                var insertResult = await table.ExecuteAsync(operation, default, default, default);
-                result = insertResult.HttpStatusCode == 200 || insertResult.HttpStatusCode == 204;
+                var tableClient = new TableClient(this.configurationValues.StatisticsStorageConnectionString,
+                    this.configurationValues.StatisticsTableName);
+                await tableClient.CreateIfNotExistsAsync();
+                var response = await tableClient.AddEntityAsync(entity);
+                result = response.Status == 204;
             }
             catch
             {
