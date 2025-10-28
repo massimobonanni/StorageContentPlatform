@@ -5,12 +5,9 @@ using Azure;
 using Newtonsoft.Json;
 using StorageContentPlatform.ManagementFunctions.Entities;
 using StorageContentPlatform.ManagementFunctions.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace StorageContentPlatform.ManagementFunctions.Services
@@ -77,11 +74,13 @@ namespace StorageContentPlatform.ManagementFunctions.Services
 
         private readonly IConfiguration configuration;
         private readonly Configuration configurationValues;
+        private readonly ILogger<StorageTableInventoryPersistanceService> logger;
 
-        public StorageTableInventoryPersistanceService(IConfiguration configuration)
+        public StorageTableInventoryPersistanceService(IConfiguration configuration, ILogger<StorageTableInventoryPersistanceService> logger)
         {
             this.configuration = configuration;
             this.configurationValues = new Configuration();
+            this.logger = logger;
         }
 
         private void LoadConfig()
@@ -98,14 +97,17 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             var entity = new StatisticEntity(statistics);
             try
             {
+                logger.LogInformation("Saving inventory statistics to table storage");
                 var tableClient = new TableClient(this.configurationValues.StatisticsStorageConnectionString,
                     this.configurationValues.StatisticsTableName);
                 await tableClient.CreateIfNotExistsAsync();
                 var response = await tableClient.AddEntityAsync(entity);
                 result = response.Status == 204;
+                logger.LogInformation("Successfully saved inventory statistics with status: {Status}", response.Status);
             }
-            catch
+            catch (Exception ex)
             {
+                logger.LogError(ex, "Failed to save inventory statistics to table storage");
                 result = false;
             }
 
@@ -118,6 +120,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             LoadConfig();
             try
             {
+                logger.LogInformation("Reading inventory manifest from blob URL: {BlobUrl}", manifestBlobUrl);
                 manifestBlobUrl.ExtractContainerAndBlobName(out var containername, out var blobName);
                 var blobClient = new BlobClient(this.configurationValues.InventoryStorageConnectionString,
                     containername, blobName);
@@ -126,15 +129,15 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 {
                     PropertyNameCaseInsensitive = true
                 });
+                logger.LogInformation("Successfully read inventory manifest from blob");
             }
-            catch
+            catch (Exception ex)
             {
+                logger.LogError(ex, "Failed to read inventory manifest from blob URL: {BlobUrl}", manifestBlobUrl);
                 result = null;
             }
 
             return result;
         }
-
-
     }
 }

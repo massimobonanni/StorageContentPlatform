@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic.FileIO;
 using StorageContentPlatform.ManagementFunctions.Entities;
 using StorageContentPlatform.ManagementFunctions.Interfaces;
@@ -21,11 +22,13 @@ namespace StorageContentPlatform.ManagementFunctions.Services
         }
 
         private readonly IConfiguration configuration;
+        private readonly ILogger<InventoryAnalyzer> logger;
         private readonly Configuration configurationValues;
 
-        public InventoryAnalyzer(IConfiguration configuration)
+        public InventoryAnalyzer(IConfiguration configuration, ILogger<InventoryAnalyzer> logger)
         {
             this.configuration = configuration;
+            this.logger = logger;
             this.configurationValues = new Configuration();
         }
 
@@ -33,10 +36,14 @@ namespace StorageContentPlatform.ManagementFunctions.Services
 
         private void LoadConfig()
         {
+            logger.LogDebug("Loading configuration values");
             this.configurationValues.InventoryStorageConnectionString = this.configuration.GetValue<string>("InventoryStorageConnectionString");
             this.configurationValues.MetadataFields = this.configuration
                 .GetValue<string>("MetadataFields")
                 .Split(MetadataSeparator, StringSplitOptions.RemoveEmptyEntries);
+            
+            logger.LogDebug("Configuration loaded. Metadata fields count: {MetadataFieldsCount}", 
+                this.configurationValues.MetadataFields?.Count() ?? 0);
         }
 
         private const string ContentLengthColumn = "Content-Length";
@@ -45,6 +52,8 @@ namespace StorageContentPlatform.ManagementFunctions.Services
 
         public async Task<InventoryStatistics> AnalyzeAsync(InventoryManifest manifest)
         {
+            logger.LogInformation("Starting inventory analysis for manifest with {FileCount} files", manifest.Files?.Count ?? 0);
+            
             InventoryStatistics result = null;
             LoadConfig();
 
@@ -56,8 +65,12 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                     result.InventoryStartTime = manifest.InventoryStartTime;
                     result.InventoryCompletionTime = manifest.InventoryCompletionTime;
 
+                    logger.LogDebug("Processing {FileCount} inventory files", manifest.Files.Count);
+
                     foreach (var file in manifest.Files)
                     {
+                        logger.LogDebug("Processing inventory file: {BlobName}", file.Blob);
+                        
                         var blobClient = new BlobClient(this.configurationValues.InventoryStorageConnectionString,
                             manifest.DestinationContainer, file.Blob);
                         var blobContent = await blobClient.DownloadContentAsync();
@@ -68,12 +81,14 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                             parser.SetDelimiters(",");
                             var rowIndex = 0;
                             int contentLengthColumnIndex = 0, accessTierColumnIndex = 0, metadataColumnIndex = 0;
+                            
                             while (!parser.EndOfData)
                             {
                                 //Processing row
                                 string[] fields = parser.ReadFields();
                                 if (rowIndex == 0)
                                 {
+                                    logger.LogDebug("Processing CSV header row");
                                     contentLengthColumnIndex = fields.Select((elem, index) => new { elem, index })
                                             .First(p => p.elem == ContentLengthColumn)
                                             .index;
@@ -91,14 +106,25 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                                 }
                                 rowIndex++;
                             }
+                            
+                            logger.LogDebug("Processed {RowCount} rows from file {BlobName}", rowIndex, file.Blob);
                         }
                     }
+                    
+                    logger.LogInformation("Inventory analysis completed. Total objects: {ObjectCount}, Total size: {TotalSize} bytes", 
+                        result.ObjectCount, result.TotalObjectSize);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    logger.LogError(ex, "Error occurred during inventory analysis");
                     result = null;
                 }
             }
+            else
+            {
+                logger.LogWarning("No files found in manifest for analysis");
+            }
+            
             return result;
         }
 
