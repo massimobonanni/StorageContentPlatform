@@ -86,6 +86,15 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                             {
                                 //Processing row
                                 string[] fields = parser.ReadFields();
+
+                                // Skip empty or incomplete rows
+                                if (fields == null || fields.Length == 0 || 
+                                    (fields.Length == 1 && string.IsNullOrWhiteSpace(fields[0])))
+                                {
+                                    rowIndex++;
+                                    continue;
+                                }
+
                                 if (rowIndex == 0)
                                 {
                                     logger.LogDebug("Processing CSV header row");
