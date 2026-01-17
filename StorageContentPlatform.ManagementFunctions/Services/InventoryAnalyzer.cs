@@ -25,6 +25,11 @@ namespace StorageContentPlatform.ManagementFunctions.Services
         private readonly ILogger<InventoryAnalyzer> logger;
         private readonly Configuration configurationValues;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InventoryAnalyzer"/> class.
+        /// </summary>
+        /// <param name="configuration">The application configuration containing inventory settings.</param>
+        /// <param name="logger">The logger instance for diagnostic logging.</param>
         public InventoryAnalyzer(IConfiguration configuration, ILogger<InventoryAnalyzer> logger)
         {
             this.configuration = configuration;
@@ -32,8 +37,14 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             this.configurationValues = new Configuration();
         }
 
+        /// <summary>
+        /// Separator characters used to parse metadata field configuration values.
+        /// </summary>
         private static char[] MetadataSeparator = { '|',';',',' };
 
+        /// <summary>
+        /// Loads configuration values from the application settings into the internal configuration object.
+        /// </summary>
         private void LoadConfig()
         {
             logger.LogDebug("Loading configuration values");
