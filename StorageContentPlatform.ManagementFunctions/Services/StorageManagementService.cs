@@ -12,11 +12,22 @@ using System.Threading.Tasks;
 
 namespace StorageContentPlatform.ManagementFunctions.Services
 {
+    /// <summary>
+    /// Provides management operations for Azure Storage, including blob undelete functionality.
+    /// </summary>
     public class StorageManagementService : IPersistenceManagementService
     {
+        /// <summary>
+        /// Internal configuration settings for the storage management service.
+        /// Automatically parses the storage connection string to extract account credentials.
+        /// </summary>
         private class Configuration
         {
-            private string storageConnectionString; 
+            private string storageConnectionString;
+            
+            /// <summary>
+            /// Gets or sets the storage connection string and automatically parses it to extract AccountName and SharedKey.
+            /// </summary>
             public string StorageConnectionString { 
                 get=> storageConnectionString;
                 set
@@ -37,7 +48,15 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                     }   
                 }
             }
+            
+            /// <summary>
+            /// Gets the storage account name extracted from the connection string.
+            /// </summary>
             public string AccountName { get; private set; }
+            
+            /// <summary>
+            /// Gets the storage account shared key extracted from the connection string.
+            /// </summary>
             public string SharedKey { get; private set; }
         }
 
