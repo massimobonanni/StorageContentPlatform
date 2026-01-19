@@ -151,26 +151,46 @@ namespace StorageContentPlatform.ManagementFunctions.Services
         private void ManageMetadataCounters(InventoryStatistics result, int metadataColumnIndex, string[] fields)
         {
             var metadataField = fields[metadataColumnIndex];
-            var metadataColumn = JsonSerializer.Deserialize<Dictionary<string, string>>(metadataField);
-
-            foreach (var item in this.configurationValues.MetadataFields)
+            
+            // Skip if metadata field is null, empty, or whitespace
+            if (string.IsNullOrWhiteSpace(metadataField))
             {
-                if (metadataColumn.ContainsKey(item))
+                return;
+            }
+
+            try
+            {
+                var metadataColumn = JsonSerializer.Deserialize<Dictionary<string, string>>(metadataField);
+
+                // Handle case where deserialization returns null
+                if (metadataColumn == null)
                 {
-                    var metadataValue = metadataColumn[item];
+                    return;
+                }
 
-                    if (!result.MetadataList.ContainsKey(item))
-                        result.MetadataList.Add(item, new Metadata() { Label = item });
+                foreach (var item in this.configurationValues.MetadataFields)
+                {
+                    if (metadataColumn.ContainsKey(item))
+                    {
+                        var metadataValue = metadataColumn[item];
 
-                    if (!result.MetadataList[item].Counters.ContainsKey(metadataValue))
-                    {
-                        result.MetadataList[item].Counters.Add(metadataValue, 1);
-                    }
-                    else
-                    {
-                        result.MetadataList[item].Counters[metadataValue]++;
+                        if (!result.MetadataList.ContainsKey(item))
+                            result.MetadataList.Add(item, new Metadata() { Label = item });
+
+                        if (!result.MetadataList[item].Counters.ContainsKey(metadataValue))
+                        {
+                            result.MetadataList[item].Counters.Add(metadataValue, 1);
+                        }
+                        else
+                        {
+                            result.MetadataList[item].Counters[metadataValue]++;
+                        }
                     }
                 }
+            }
+            catch (JsonException ex)
+            {
+                logger.LogWarning(ex, "Failed to deserialize metadata field: {MetadataField}", metadataField);
             }
         }
 
