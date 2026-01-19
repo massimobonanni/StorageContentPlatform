@@ -19,18 +19,17 @@ namespace StorageContentPlatform.ManagementFunctions
     public class ManagementFunctions
     {
         private readonly IConfiguration configuration;
-        private readonly IInventoryAnalyzer inventoryAnalyzer;
-        private readonly IInventoryPersistanceService persistanceService;
+        private readonly IManifestManagementService manifestManagementService;
         private readonly IPersistenceManagementService persistentManagementService;
         private readonly ILogger<ManagementFunctions> logger;
 
         public ManagementFunctions(IConfiguration configuration,
-            IInventoryAnalyzer inventoryAnalyzer, IInventoryPersistanceService persistanceService,
-            IPersistenceManagementService persistentManagementService, ILogger<ManagementFunctions> logger)
+            IManifestManagementService manifestManagementService,
+            IPersistenceManagementService persistentManagementService, 
+            ILogger<ManagementFunctions> logger)
         {
             this.configuration = configuration;
-            this.inventoryAnalyzer = inventoryAnalyzer;
-            this.persistanceService = persistanceService;
+            this.manifestManagementService = manifestManagementService;
             this.persistentManagementService = persistentManagementService;
             this.logger = logger;
         }
@@ -51,28 +50,16 @@ namespace StorageContentPlatform.ManagementFunctions
                 return;
             }
 
-            logger.LogInformation($"Calling ReadInventoryManifestFile {data.ManifestBlobUrl}");
-            var inventoryManifest = await this.persistanceService.ReadInventoryManifestFile(data.ManifestBlobUrl);
-            logger.LogInformation($"Called ReadInventoryManifestFile {data.ManifestBlobUrl} started at {inventoryManifest?.InventoryStartTime}");
-            if (inventoryManifest != null)
+            logger.LogInformation($"Processing manifest {data.ManifestBlobUrl}");
+            var result = await manifestManagementService.ProcessManifestAsync(data.ManifestBlobUrl);
+
+            if (result.Success)
             {
-                logger.LogInformation($"Calling AnalyzeAsync {data.ManifestBlobUrl}");
-                var inventoryStatistics = await this.inventoryAnalyzer.AnalyzeAsync(inventoryManifest);
-                logger.LogInformation($"Called AnalyzeAsync {data.ManifestBlobUrl} analyzed {inventoryStatistics?.ObjectCount} objects ");
-                if (inventoryStatistics != null)
-                {
-                    logger.LogInformation($"Calling SaveAsync {data.ManifestBlobUrl}");
-                    var saveResult = await this.persistanceService.SaveAsync(inventoryStatistics);
-                    logger.LogInformation($"Called SaveAsync {data.ManifestBlobUrl} with {saveResult} result");
-                }
-                else
-                {
-                    logger.LogError($"Failed to analyze inventory {data.ManifestBlobUrl}");
-                }
+                logger.LogInformation($"Successfully processed manifest {data.ManifestBlobUrl} with {result.Statistics.ObjectCount} objects");
             }
             else
             {
-                logger.LogError($"Inventory manifest {data.ManifestBlobUrl} not read");
+                logger.LogError($"Failed to process manifest {data.ManifestBlobUrl}: {result.ErrorMessage}");
             }
         }
 
@@ -121,35 +108,21 @@ namespace StorageContentPlatform.ManagementFunctions
                     return response;
                 }
 
-                logger.LogInformation($"Reading inventory manifest from {data.ManifestBlobUrl}");
-                var inventoryManifest = await this.persistanceService.ReadInventoryManifestFile(data.ManifestBlobUrl);
+                logger.LogInformation($"Processing manifest analysis request for {data.ManifestBlobUrl}");
+                var result = await manifestManagementService.ProcessManifestAsync(data.ManifestBlobUrl);
 
-                if (inventoryManifest == null)
-                {
-                    response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                    await response.WriteStringAsync($"Inventory manifest not found at {data.ManifestBlobUrl}");
-                    return response;
-                }
-
-                logger.LogInformation($"Analyzing inventory manifest started at {inventoryManifest.InventoryStartTime}");
-                var inventoryStatistics = await this.inventoryAnalyzer.AnalyzeAsync(inventoryManifest);
-
-                if (inventoryStatistics == null)
+                if (!result.Success)
                 {
                     response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                    await response.WriteStringAsync("Failed to analyze inventory");
+                    await response.WriteStringAsync(result.ErrorMessage);
                     return response;
                 }
-
-                logger.LogInformation($"Analyzed {inventoryStatistics.ObjectCount} objects");
-                var saveResult = await this.persistanceService.SaveAsync(inventoryStatistics);
-                logger.LogInformation($"Save result: {saveResult}");
 
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 await response.WriteAsJsonAsync(new
                 {
-                    Success = saveResult,
-                    ObjectCount = inventoryStatistics.ObjectCount,
+                    Success = true,
+                    ObjectCount = result.Statistics.ObjectCount,
                     Message = "Inventory analysis completed successfully"
                 });
             }

@@ -11,6 +11,7 @@ var host = new HostBuilder()
         services.AddScoped<IInventoryPersistanceService, StorageTableInventoryPersistanceService>();
         services.AddScoped<IInventoryAnalyzer, InventoryAnalyzer>();
         services.AddScoped<IPersistenceManagementService, StorageManagementService>();
+        services.AddScoped<IManifestManagementService, ManifestManagementService>();
     })
     .Build();
 
