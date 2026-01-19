@@ -137,6 +137,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error occurred during inventory analysis");
+                    throw;
                     result = null;
                 }
             }
