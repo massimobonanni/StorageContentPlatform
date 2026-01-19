@@ -1,12 +1,13 @@
-﻿using Azure.Storage.Blobs;
-using Microsoft.Extensions.Configuration;
+﻿using Azure;
 using Azure.Data.Tables;
-using Azure;
+using Azure.Storage.Blobs;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StorageContentPlatform.ManagementFunctions.Entities;
 using StorageContentPlatform.ManagementFunctions.Interfaces;
-using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -97,7 +98,7 @@ namespace StorageContentPlatform.ManagementFunctions.Services
                 this.ObjectInHotCount = statistics.ObjectInHotCount;
                 this.TotalObjectInArchiveSize = statistics.TotalObjectInArchiveSize;
                 this.ObjectInArchiveCount = statistics.ObjectInArchiveCount;
-                this.MetadataListJson = statistics.MetadataList != null 
+                this.MetadataList = statistics.MetadataList != null 
                     ? JsonConvert.SerializeObject(statistics.MetadataList) 
                     : null;
             }
@@ -165,7 +166,9 @@ namespace StorageContentPlatform.ManagementFunctions.Services
             /// <summary>
             /// Gets or sets the JSON representation of the metadata list.
             /// </summary>
-            public string MetadataListJson { get; set; }
+            public string MetadataList { get; set; }
+
+
         }
 
         private readonly IConfiguration configuration;
