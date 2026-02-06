@@ -26,7 +26,7 @@ namespace StorageContentPlatform.ContentCreator.Services
         public StorageAccountProvider(IConfiguration configuration,
             ILoggerFactory loggerFactory)
         {
-            this.logger = loggerFactory.CreateLogger< StorageAccountProvider>();
+            this.logger = loggerFactory.CreateLogger<StorageAccountProvider>();
             this.configuration = configuration;
             this.configurationValues = new Configuration();
         }
@@ -38,18 +38,17 @@ namespace StorageContentPlatform.ContentCreator.Services
             LoadConfig();
 
             BlobContainerClient container = new BlobContainerClient(
-                this.configurationValues.StorageConnectionString, 
+                this.configurationValues.StorageConnectionString,
                 this.configurationValues.StorageContainerName);
 
             await container.CreateIfNotExistsAsync();
 
+            BlobClient blob = container.GetBlobClient(contentName);
+
             try
             {
-                BlobClient blob = container.GetBlobClient(contentName);
-
                 await blob.UploadAsync(BinaryData.FromString(content), overwrite: true);
-                if (metadata != null && metadata.Any())
-                    await blob.SetMetadataAsync(metadata);
+
             }
             catch (Exception ex)
             {
@@ -57,6 +56,18 @@ namespace StorageContentPlatform.ContentCreator.Services
                 result = false;
             }
 
+            if (result && metadata != null && metadata.Any())
+            {
+                try
+                {
+                    await blob.SetMetadataAsync(metadata);
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, "Error saving metadata {ContentName} - {Metadata}", contentName, metadata.ToConcatenatedString());
+                    result = false;
+                }
+            }
             return result;
         }
 
