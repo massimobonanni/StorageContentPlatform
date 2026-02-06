@@ -2,21 +2,34 @@
 using Microsoft.Extensions.Logging;
 using StorageContentPlatform.ContentCreator.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Unicode;
+using System.Threading;
 using System.Threading.Tasks;
-using Utilities = StorageContentPlatform.ContentCreator.Utilities;
 
 namespace StorageContentPlatform.ContentCreator.Services
 {
+    /// <summary>
+    /// Generates random content blobs and persists them using the configured persistence provider.
+    /// </summary>
     public class ContentGenerator : IContentGenerator
     {
+        /// <summary>
+        /// Configuration settings for content generation.
+        /// </summary>
         private class Configuration
         {
+            /// <summary>
+            /// Gets or sets the minimum size in kilobytes for generated blobs.
+            /// </summary>
             public int BlobMinimumSizeInKb { get; set; }
+
+            /// <summary>
+            /// Gets or sets the maximum size in kilobytes for generated blobs.
+            /// </summary>
             public int BlobMaximumSizeInKb { get; set; }
+
+            /// <summary>
+            /// Gets or sets the total cumulative size in kilobytes to generate before stopping.
+            /// </summary>
             public int ContentsSizeForGenerationInKb { get; set; }
         }
 
@@ -25,6 +38,12 @@ namespace StorageContentPlatform.ContentCreator.Services
         private readonly Configuration configurationValues;
         private readonly ILogger<ContentGenerator> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ContentGenerator"/> class.
+        /// </summary>
+        /// <param name="persistanceProvider">The persistence provider used to save generated content.</param>
+        /// <param name="configuration">The application configuration containing generation settings.</param>
+        /// <param name="loggerFactory">The factory used to create logger instances.</param>
         public ContentGenerator(IPersistanceProvider persistanceProvider,
             IConfiguration configuration, ILoggerFactory loggerFactory)
         {
@@ -34,7 +53,13 @@ namespace StorageContentPlatform.ContentCreator.Services
             this.logger = loggerFactory.CreateLogger<ContentGenerator>();
         }
 
-        public async Task<bool> GenerateContentsAsync()
+        /// <summary>
+        /// Generates random content blobs until the cumulative size reaches the configured threshold.
+        /// Each content blob is assigned a unique identifier, timestamped filename, and metadata.
+        /// </summary>
+        /// <param name="token">Optional cancellation token to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation, containing a boolean indicating success.</returns>
+        public async Task<bool> GenerateContentsAsync(CancellationToken token=default)
         {
             var result = true;
             LoadConfig();
@@ -60,6 +85,9 @@ namespace StorageContentPlatform.ContentCreator.Services
             return result;
         }
 
+        /// <summary>
+        /// Loads configuration values from the application configuration into the internal configuration object.
+        /// </summary>
         private void LoadConfig()
         {
             this.logger.LogInformation("Loading configuration");
