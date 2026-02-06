@@ -67,6 +67,8 @@ namespace StorageContentPlatform.ContentCreator.Services
         public async Task<bool> SaveContentAsync(string contentName, string content,
             IDictionary<string, string> metadata = null, CancellationToken token = default)
         {
+            this.logger.LogInformation("Saving content to Azure Blob Storage. Content Name: {ContentName}, Metadata: {Metadata}",
+                contentName, metadata.ToConcatenatedString());
             var result = true;
             LoadConfig();
 
@@ -89,10 +91,12 @@ namespace StorageContentPlatform.ContentCreator.Services
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Error saving metadata {ContentName} - {Metadata}", contentName, metadata.ToConcatenatedString());
+                this.logger.LogError(ex, "Error saving {ContentName} - {Metadata}", contentName, metadata.ToConcatenatedString());
                 result = false;
             }
 
+            this.logger.LogInformation("Finished saving content to Azure Blob Storage. Content Name: {ContentName}, Metadata: {Metadata}, Result: {Result}",
+                contentName, metadata.ToConcatenatedString(), result);
             return result;
         }
 
