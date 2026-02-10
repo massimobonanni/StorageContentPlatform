@@ -7,18 +7,40 @@ using StorageContentPlatform.Web.Interfaces;
 
 namespace StorageContentPlatform.Web.Services
 {
+    /// <summary>
+    /// Service implementation for managing Azure Blob Storage contents.
+    /// Provides methods to retrieve containers, blobs, and blob content with support for geo-redundant storage and retry policies.
+    /// </summary>
     public class StorageContentsService : IContentsService
     {
+        /// <summary>
+        /// Configuration settings for Azure Blob Storage connection and container filtering.
+        /// </summary>
         private class Configuration
         {
+            /// <summary>
+            /// Gets or sets the Azure Storage connection string.
+            /// </summary>
             public string? StorageConnectionString { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the Azure Storage account name.
+            /// </summary>
             public string? StorageAccountName { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the collection of container types to filter.
+            /// </summary>
             public IEnumerable<string>? ContainerTypes { get; set; }
         }
 
         private readonly IConfiguration configuration;
         private readonly Configuration configurationValues;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StorageContentsService"/> class.
+        /// </summary>
+        /// <param name="configuration">The application configuration instance.</param>
         public StorageContentsService(IConfiguration configuration)
         {
             this.configuration = configuration;
@@ -27,6 +49,12 @@ namespace StorageContentPlatform.Web.Services
 
 
         #region [ Public Methods - IContentsService implementation ]
+        
+        /// <summary>
+        /// Retrieves all blob containers from Azure Storage that match the configured container types.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>A collection of <see cref="ContainerInfo"/> objects representing the filtered containers.</returns>
         public async Task<IEnumerable<ContainerInfo>> GetContainersAsync(CancellationToken cancellationToken = default)
         {
             var result = new List<ContainerInfo>();
@@ -57,6 +85,13 @@ namespace StorageContentPlatform.Web.Services
             return result;
         }
 
+        /// <summary>
+        /// Retrieves all blobs from a specified container that match the provided date prefix.
+        /// </summary>
+        /// <param name="containerName">The name of the container to search.</param>
+        /// <param name="date">The date used to filter blobs by prefix (formatted as yyyyMMdd).</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>A collection of <see cref="BlobInfo"/> objects ordered by last modified date in descending order.</returns>
         public async Task<IEnumerable<Entities.BlobInfo>> GetBlobsAsync(string containerName, DateTime date, CancellationToken cancellationToken = default)
         {
             var result = new List<Entities.BlobInfo>();
@@ -90,6 +125,13 @@ namespace StorageContentPlatform.Web.Services
             return result.OrderByDescending(b => b.LastModified);
         }
 
+        /// <summary>
+        /// Downloads a specific blob from a container including its content and metadata.
+        /// </summary>
+        /// <param name="containerName">The name of the container containing the blob.</param>
+        /// <param name="blobName">The name of the blob to retrieve.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>A <see cref="BlobContent"/> object containing the blob's content and metadata.</returns>
         public async Task<BlobContent> GetBlobAsync(string containerName, string blobName, CancellationToken cancellationToken)
         {
             var result = new BlobContent();
@@ -114,6 +156,10 @@ namespace StorageContentPlatform.Web.Services
         #endregion [ Public Methods - IContentsService implementation ]
 
         #region [ Private Methods ]
+        
+        /// <summary>
+        /// Loads configuration values from the application configuration including storage connection string, account name, and container types.
+        /// </summary>
         private void LoadConfig()
         {
             this.configurationValues.StorageConnectionString = this.configuration.GetValue<string>("StorageConnectionString");
@@ -123,6 +169,10 @@ namespace StorageContentPlatform.Web.Services
                     .Split("|", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
         }
 
+        /// <summary>
+        /// Creates a <see cref="BlobServiceClient"/> instance using either a connection string or DefaultAzureCredential.
+        /// </summary>
+        /// <returns>A configured <see cref="BlobServiceClient"/> instance.</returns>
         private BlobServiceClient CreateBlobServiceClient()
         {
             BlobServiceClient? blobServiceClient = null;
@@ -144,6 +194,11 @@ namespace StorageContentPlatform.Web.Services
             return blobServiceClient;
         }
 
+        /// <summary>
+        /// Creates a <see cref="BlobContainerClient"/> instance for a specific container using either a connection string or DefaultAzureCredential.
+        /// </summary>
+        /// <param name="containerName">The name of the container.</param>
+        /// <returns>A configured <see cref="BlobContainerClient"/> instance.</returns>
         private BlobContainerClient CreateBlobContainerClient(string containerName)
         {
             BlobContainerClient? blobContainerClient = null;
@@ -164,6 +219,12 @@ namespace StorageContentPlatform.Web.Services
             return blobContainerClient;
         }
 
+        /// <summary>
+        /// Creates a <see cref="BlobClient"/> instance for a specific blob using either a connection string or DefaultAzureCredential.
+        /// </summary>
+        /// <param name="containerName">The name of the container containing the blob.</param>
+        /// <param name="blobName">The name of the blob.</param>
+        /// <returns>A configured <see cref="BlobClient"/> instance.</returns>
         private BlobClient CreateBlobClient(string containerName, string blobName)
         {
             BlobClient? blobClient = null;
@@ -187,6 +248,10 @@ namespace StorageContentPlatform.Web.Services
             return blobClient;
         }
 
+        /// <summary>
+        /// Creates and configures <see cref="BlobClientOptions"/> with retry policies and geo-redundant secondary URI support.
+        /// </summary>
+        /// <returns>A configured <see cref="BlobClientOptions"/> instance with exponential retry policy.</returns>
         private BlobClientOptions GetClientOptions()
         {
             var options = new BlobClientOptions();
@@ -202,6 +267,10 @@ namespace StorageContentPlatform.Web.Services
             return options;
         }
 
+        /// <summary>
+        /// Constructs the secondary URL for geo-redundant storage access.
+        /// </summary>
+        /// <returns>The secondary storage account URL, or null if it cannot be determined.</returns>
         private string? GetSecondaryUrl()
         {
             string? secondaryUrl = null;

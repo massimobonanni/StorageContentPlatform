@@ -4,8 +4,19 @@ using StorageContentPlatform.Web.Entities;
 
 namespace Azure.Data.Tables
 {
+    /// <summary>
+    /// Provides extension methods for <see cref="TableEntity"/> to convert Azure Table Storage entities 
+    /// to domain-specific data objects.
+    /// </summary>
     public static class TableEntityExtensions
     {
+        /// <summary>
+        /// Converts an Azure Table Storage <see cref="TableEntity"/> to a <see cref="StatisticData"/> object.
+        /// Maps all statistical properties including inventory times, object counts, sizes per storage tier,
+        /// and deserializes the metadata list from JSON.
+        /// </summary>
+        /// <param name="entity">The table entity to convert.</param>
+        /// <returns>A <see cref="StatisticData"/> object populated with values from the table entity.</returns>
         public static StatisticData ToStatisticData(this TableEntity entity)
         {
             var data = new StatisticData();
