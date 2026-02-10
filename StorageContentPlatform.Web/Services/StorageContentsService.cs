@@ -143,12 +143,10 @@ namespace StorageContentPlatform.Web.Services
             var blobContent = await blobClient.DownloadContentAsync(cancellationToken);
 
             if (blobContent.HasValue)
+            {
                 result.Content = blobContent.Value.Content.ToString();
-
-            var properties = await blobClient.GetPropertiesAsync(null, cancellationToken);
-
-            if (properties.HasValue)
-                result.Metadata = properties.Value.Metadata;
+                result.Metadata = blobContent.Value.Details.Metadata; // Get metadata from the same response
+            }
 
             return result;
         }
