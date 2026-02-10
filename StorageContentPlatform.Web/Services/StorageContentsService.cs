@@ -255,10 +255,10 @@ namespace StorageContentPlatform.Web.Services
         private BlobClientOptions GetClientOptions()
         {
             var options = new BlobClientOptions();
-            options.Retry.Delay = TimeSpan.FromSeconds(2);
+            options.Retry.Delay = TimeSpan.FromMilliseconds(250);
             options.Retry.MaxRetries = 5;
             options.Retry.Mode = RetryMode.Exponential;
-            options.Retry.MaxDelay = TimeSpan.FromSeconds(10);
+            options.Retry.MaxDelay = TimeSpan.FromSeconds(5);
             var secondaryUrl = GetSecondaryUrl();
             if (!string.IsNullOrWhiteSpace(secondaryUrl))
             {
